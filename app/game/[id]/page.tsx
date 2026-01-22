@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { fetchIGDB, IGDBGame } from "@/lib/igdb";
+import { fetchIGDB } from "@/lib/api/igdb-client";
+import { IGDBGame } from "@/lib/types/igdb";
 import { IgdbAdapter } from "@/lib/adapters/igdb-adapter";
 import { Badge } from "@/components/ui/badge";
 import { Star, Calendar, Building2 } from "lucide-react";
