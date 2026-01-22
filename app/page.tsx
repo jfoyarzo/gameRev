@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/game-card";
-import { getPopularGames, getNewGames } from "@/lib/igdb";
+import { getPopularGames, getNewGames } from "@/lib/services/igdb-service";
 import Link from "next/link";
 import { ArrowRight, Flame, Sparkles } from "lucide-react";
 

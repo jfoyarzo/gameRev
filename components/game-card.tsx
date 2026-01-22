@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
-import { IGDBGame } from "@/lib/igdb";
+import { IGDBGame } from "@/lib/types/igdb";
 
 interface GameCardProps {
     game: IGDBGame;

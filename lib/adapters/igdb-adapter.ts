@@ -1,7 +1,33 @@
 import { RatingAdapter, RatingData } from "./ratings";
-import { fetchIGDB, IGDBGame } from "@/lib/igdb";
+import { SearchAdapter, SearchResult } from "@/lib/types/search";
+import { fetchIGDB } from "@/lib/api/igdb-client";
+import { IGDBGame } from "@/lib/types/igdb";
+import { searchGames } from "@/lib/services/igdb-service";
 
-export class IgdbAdapter implements RatingAdapter {
+export class IgdbAdapter implements RatingAdapter, SearchAdapter {
+    name = "IGDB";
+
+    // --- Search Implementation ---
+    async search(query: string): Promise<SearchResult[]> {
+        try {
+            const games = await searchGames(query);
+
+            return games.map(game => ({
+                id: game.id,
+                name: game.name,
+                coverUrl: game.cover?.url?.replace("t_thumb", "t_720p") || "/placeholder-game.jpg",
+                releaseDate: game.release_dates?.[0]?.human,
+                rating: game.total_rating,
+                sources: ["IGDB"],
+                platforms: game.platforms?.map(p => p.name) || []
+            }));
+        } catch (error) {
+            console.error("IGDB Search Failed:", error);
+            return [];
+        }
+    }
+
+    // --- Rating Implementation ---
     async getGameRatings(gameId: string | number): Promise<RatingData[]> {
         const query = `
       fields total_rating, total_rating_count, aggregated_rating, aggregated_rating_count, rating, rating_count, url;

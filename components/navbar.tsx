@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Gamepad2, Search } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 
 export function Navbar() {
     return (
@@ -20,8 +21,13 @@ export function Navbar() {
                 </nav>
 
                 <div className="flex flex-1 items-center justify-end gap-4">
-                    {/* Search Trigger (Mobile/Desktop) */}
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    {/* Search Input */}
+                    <div className="hidden md:block mr-4">
+                        <SearchInput />
+                    </div>
+
+                    {/* Search Trigger (Mobile Only) */}
+                    <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground hover:text-foreground">
                         <Search className="h-5 w-5" />
                         <span className="sr-only">Search</span>
                     </Button>
