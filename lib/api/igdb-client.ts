@@ -1,35 +1,5 @@
 import { cache } from "react";
 
-export interface IGDBGame {
-    id: number;
-    name: string;
-    cover?: {
-        id: number;
-        url: string;
-    };
-    screenshots?: {
-        id: number;
-        url: string;
-    }[];
-    summary?: string;
-    total_rating?: number; // Weighted Average of Critic + User
-    total_rating_count?: number;
-    rating?: number; // IGDB User Rating
-    rating_count?: number;
-    aggregated_rating?: number; // External Critic Rating
-    aggregated_rating_count?: number;
-    url?: string; // IGDB Page URL
-    release_dates?: {
-        human: string;
-        y: number;
-    }[];
-    involved_companies?: {
-        company: {
-            name: string;
-        }
-    }[];
-}
-
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID!;
 const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET!;
 
@@ -75,28 +45,4 @@ export async function fetchIGDB<T>(endpoint: string, query: string): Promise<T> 
     }
 
     return response.json();
-}
-
-// Fetch games for the home page
-export async function getPopularGames(limit = 12): Promise<IGDBGame[]> {
-    const query = `
-    fields name, cover.url, total_rating, summary;
-    sort popularity desc;
-    where cover != null & total_rating != null;
-    limit ${limit};
-  `;
-
-    return fetchIGDB<IGDBGame[]>("/games", query);
-}
-
-export async function getNewGames(limit = 4): Promise<IGDBGame[]> {
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const query = `
-    fields name, cover.url, total_rating, summary, first_release_date;
-    sort first_release_date desc;
-    where first_release_date < ${currentTimestamp} & cover != null & total_rating != null;
-    limit ${limit};
-  `;
-
-    return fetchIGDB<IGDBGame[]>("/games", query);
 }
