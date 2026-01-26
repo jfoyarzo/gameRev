@@ -17,10 +17,7 @@ export interface IGDBGame {
     aggregated_rating?: number; // External Critic Rating
     aggregated_rating_count?: number;
     url?: string; // IGDB Page URL
-    release_dates?: {
-        human: string;
-        y: number;
-    }[];
+    first_release_date?: number;
     involved_companies?: {
         company: {
             name: string;

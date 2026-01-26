@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/game-card";
-import { getPopularGames, getNewGames } from "@/lib/services/igdb-service";
+import { gameService } from "@/lib/services";
 import Link from "next/link";
 import { ArrowRight, Flame, Sparkles } from "lucide-react";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 3600; // Cache revalidation time in seconds (1 hour)
 
 export default async function Home() {
-  const popularGames = await getPopularGames(8);
-  const newGames = await getNewGames(4);
+  const popularGames = await gameService.getPopularGames(8);
+  const newGames = await gameService.getNewGames(4);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -51,7 +51,17 @@ export default async function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {newGames.map((game) => (
-            <GameCard key={game.id} game={game} />
+            <GameCard
+              key={Object.values(game.sourceIds).join("-")}
+              game={{
+                id: Number(game.sourceIds.IGDB || Object.values(game.sourceIds)[0]),
+                sourceIds: game.sourceIds,
+                name: game.name,
+                releaseDate: game.releaseDate,
+                cover: { url: game.coverUrl || "" },
+                total_rating: game.rating,
+              }}
+            />
           ))}
         </div>
       </section>
@@ -75,7 +85,17 @@ export default async function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {popularGames.map((game) => (
-            <GameCard key={game.id} game={game} />
+            <GameCard
+              key={Object.values(game.sourceIds).join("-")}
+              game={{
+                id: Number(game.sourceIds.IGDB || Object.values(game.sourceIds)[0]),
+                sourceIds: game.sourceIds,
+                name: game.name,
+                releaseDate: game.releaseDate,
+                cover: { url: game.coverUrl || "" },
+                total_rating: game.rating,
+              }}
+            />
           ))}
         </div>
       </section>

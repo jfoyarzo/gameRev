@@ -33,13 +33,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {results.map((result) => (
                         <GameCard
-                            key={`${result.sources.join("-")} - ${result.id} `}
+                            key={Object.values(result.sourceIds).join("-")}
                             game={{
-                                id: Number(result.id),
+                                id: Number(result.sourceIds.IGDB || Object.values(result.sourceIds)[0]),
+                                sourceIds: result.sourceIds,
                                 name: result.name,
-                                cover: { id: 0, url: result.coverUrl || "" },
+                                releaseDate: result.releaseDate,
+                                cover: { url: result.coverUrl || "" },
                                 total_rating: result.rating,
-                                summary: result.sources.join(", ")
                             }}
                         />
                     ))}
