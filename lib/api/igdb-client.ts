@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { CACHE_REVALIDATE_SECONDS } from "@/lib/constants";
 
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID!;
 const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET!;
@@ -34,9 +35,9 @@ export async function fetchIGDB<T>(endpoint: string, query: string): Promise<T> 
             "Accept": "application/json",
         },
         body: query,
-        // We cache the results for 1 hour (3600s) to speed up the app
+        // We cache the results for 1 hour to speed up the app
         // and save our API rate limits.
-        next: { revalidate: 3600 },
+        next: { revalidate: CACHE_REVALIDATE_SECONDS },
     });
 
     if (!response.ok) {

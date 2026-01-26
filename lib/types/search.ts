@@ -1,5 +1,5 @@
 export interface SearchResult {
-    id: string | number;
+    sourceIds: Record<string, string | number>;
     name: string;
     coverUrl?: string;
     releaseDate?: string;

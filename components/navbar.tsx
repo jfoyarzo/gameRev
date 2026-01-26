@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Gamepad2, Search } from "lucide-react";
-import { SearchInput } from "@/components/search-input";
+import { SearchInput } from "./search-input";
 
 export function Navbar() {
     return (
