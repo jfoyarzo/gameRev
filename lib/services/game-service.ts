@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { GameAdapter } from "../types/adapter";
 import { UnifiedGameData, GameSourceInfo } from "../types/game";
 import { SearchResult } from "../types/search";
@@ -13,7 +14,12 @@ export class GameService {
         this.adapters.push(adapter);
     }
 
-    async getGame(sourceIds: Record<string, string | number>, name?: string, releaseDate?: string): Promise<UnifiedGameData | null> {
+    /**
+     * Fetches unified game data from all registered adapters.
+     * Uses React cache() to deduplicate calls within the same request
+     * (e.g., when both generateMetadata() and page component fetch the same game).
+     */
+    getGame = cache(async (sourceIds: Record<string, string | number>, name?: string, releaseDate?: string): Promise<UnifiedGameData | null> => {
         // Fetch from all adapters in parallel
         // We pass the sourceIds map and releaseDate for verification.
         const promises = this.adapters.map(adapter => adapter.getGameDetails(sourceIds, name, releaseDate));
@@ -52,7 +58,7 @@ export class GameService {
         };
 
         return unified;
-    }
+    });
 
     async getPopularGames(limit?: number): Promise<SearchResult[]> {
         // Prefer IGDB for popular games lists if available

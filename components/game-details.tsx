@@ -1,10 +1,13 @@
 "use client";
 
-import { useGame } from "@/lib/context/game-context";
+import { UnifiedGameData } from "@/lib/types/game";
 import { useState } from "react";
 
-export function GameDetails() {
-    const { game } = useGame();
+interface GameDetailsProps {
+    game: UnifiedGameData;
+}
+
+export function GameDetails({ game }: GameDetailsProps) {
     const sourceNames = Object.keys(game.sources);
     const [activeTab, setActiveTab] = useState(sourceNames[0]);
 
@@ -22,8 +25,8 @@ export function GameDetails() {
                                     key={name}
                                     onClick={() => setActiveTab(name)}
                                     className={`text-xs px-2 py-1 rounded border transition-colors ${activeTab === name
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "bg-muted text-muted-foreground border-transparent hover:border-muted-foreground/30"
+                                        ? "bg-primary text-primary-foreground border-primary"
+                                        : "bg-muted text-muted-foreground border-transparent hover:border-muted-foreground/30"
                                         }`}
                                 >
                                     {name}
