@@ -39,53 +39,35 @@ export class SearchService {
      * Aggregates search results by merging entries that represent the same game.
      * 
      * Strategy:
-     * 1. Group results by normalized name (removes special characters)
-     * 2. Within each name group, merge results with matching release dates (within 1 month)
-     * 3. Sort final results by rating (highest first)
+     * 1. Iterate through all results and compare with already merged results.
+     * 2. Merge if names match exactly and release dates are within 1 month.
+     * 3. Merge if one name contains the other and release dates are identical.
+     * 4. Sort final results by rating (highest first).
      * 
      * @param results All search results from all adapters
      * @returns Aggregated and sorted results
      */
     private aggregateResults(results: SearchResult[]): SearchResult[] {
-        // Step 1: Group by normalized name
-        const groups = new Map<string, SearchResult[]>();
-        for (const result of results) {
-            // Use the centralized normalization utility
-            const nameKey = normalizeGameName(result.name);
-            const list = groups.get(nameKey) || [];
-            list.push(result);
-            groups.set(nameKey, list);
-        }
+        const mergedResults: SearchResult[] = [];
 
-        const finalResults: SearchResult[] = [];
+        for (const incoming of results) {
+            let foundMatch = false;
 
-        // Step 2: Within each name group, merge results with matching release dates
-        for (const nameGroup of groups.values()) {
-            const matched: SearchResult[] = [];
-
-            for (const result of nameGroup) {
-                let foundMatch = false;
-
-                // Try to find an existing result that matches by release date
-                for (let i = 0; i < matched.length; i++) {
-                    if (this.isWithinOneMonth(matched[i], result)) {
-                        // Merge the source data into the existing result
-                        matched[i] = this.mergeResults(matched[i], result);
-                        foundMatch = true;
-                        break;
-                    }
-                }
-
-                // If no match found, add as a new result
-                if (!foundMatch) {
-                    matched.push(result);
+            for (let i = 0; i < mergedResults.length; i++) {
+                if (this.shouldMerge(mergedResults[i], incoming)) {
+                    mergedResults[i] = this.mergeResults(mergedResults[i], incoming);
+                    foundMatch = true;
+                    break;
                 }
             }
-            finalResults.push(...matched);
+
+            if (!foundMatch) {
+                mergedResults.push(incoming);
+            }
         }
 
         // Step 3: Sort by rating (highest first, with ratings prioritized over no ratings)
-        return finalResults.sort((a, b) => {
+        return mergedResults.sort((a, b) => {
             // Games with ratings come first
             if (a.rating && !b.rating) return -1;
             if (!a.rating && b.rating) return 1;
@@ -94,6 +76,28 @@ export class SearchService {
             // Neither has rating: maintain original order
             return 0;
         });
+    }
+
+    /**
+     * Determines if two search results represent the same game and should be merged.
+     */
+    private shouldMerge(a: SearchResult, b: SearchResult): boolean {
+        const nameA = normalizeGameName(a.name);
+        const nameB = normalizeGameName(b.name);
+
+        // Case 1: Exact name match + within 1 month date tolerance
+        if (nameA === nameB && this.isWithinOneMonth(a, b)) {
+            return true;
+        }
+
+        // Case 2: Substring match + exact release date match
+        // This handles cases like "Final Fantasy 7" and "Final Fantasy 7: Remake" 
+        // that share the same release date (e.g. for a specific platform's release).
+        if ((nameA.includes(nameB) || nameB.includes(nameA)) && this.isSameDate(a, b)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -122,25 +126,33 @@ export class SearchService {
         }
     }
 
+    /**
+     * Checks if two search results have exactly the same release date.
+     */
+    private isSameDate(a: SearchResult, b: SearchResult): boolean {
+        if (!a.releaseDate || !b.releaseDate) return false;
+        return a.releaseDate === b.releaseDate;
+    }
 
     /**
      * Merges two search results that represent the same game from different sources.
      * 
      * Merge strategy:
      * 1. Combine sourceIds from both results
-     * 2. Prefer existing metadata (cover, date) if present, otherwise use incoming
-     * 3. Prefer existing rating if present, otherwise use incoming
-     * 4. Combine sources and platforms arrays (de-duplicated)
+     * 2. Prefer the longer name (likely more accurate)
+     * 3. Prefer existing metadata (cover, date) if present, otherwise use incoming
+     * 4. Prefer existing rating if present, otherwise use incoming
+     * 5. Combine sources and platforms arrays (de-duplicated)
      * 
      * @param existing The existing search result
      * @param incoming The new search result to merge in
      * @returns Merged search result
      */
     private mergeResults(existing: SearchResult, incoming: SearchResult): SearchResult {
-
         const merged: SearchResult = {
             ...existing,
             sourceIds: { ...existing.sourceIds, ...incoming.sourceIds },
+            name: existing.name.length >= incoming.name.length ? existing.name : incoming.name,
             coverUrl: existing.coverUrl || incoming.coverUrl,
             releaseDate: existing.releaseDate || incoming.releaseDate,
             rating: existing.rating ?? incoming.rating,

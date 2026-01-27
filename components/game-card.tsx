@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
 import { Star } from "lucide-react";
 import { RATING_EXCELLENT_THRESHOLD, RATING_GOOD_THRESHOLD } from "@/lib/constants";
@@ -37,11 +38,12 @@ export function GameCard({ game }: GameCardProps) {
         <Link href={`/game/${game.id}?name=${encodeURIComponent(game.name)}&rd=${encodeURIComponent(game.releaseDate || "")}&${sourceIdsParams}`} className="group">
             <Card className="overflow-hidden border-none bg-card/40 hover:bg-card/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="aspect-3/4 overflow-hidden relative">
-                    <img
+                    <Image
                         src={coverUrl}
                         alt={game.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute top-2 right-2">
                         {rating > 0 && (

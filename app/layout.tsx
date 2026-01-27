@@ -15,8 +15,47 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GameRev",
-  description: "Video game ratings from sources you can trust and community reviews.",
+  title: {
+    default: "GameRev - Trusted Video Game Ratings",
+    template: "%s | GameRev",
+  },
+  description: "Discover the highest-rated games from critics and players alike. Unbiased scores, community reviews, and comprehensive game information.",
+  keywords: ["video games", "game ratings", "game reviews", "IGDB", "RAWG", "metacritic", "gaming"],
+  authors: [{ name: "GameRev" }],
+  creator: "GameRev",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://gamerev.app", // To be determined
+    siteName: "GameRev",
+    title: "GameRev - Trusted Video Game Ratings",
+    description: "Discover the highest-rated games from critics and players alike.",
+    images: [
+      {
+        url: "/og-image.png", // TODO: Generate a proper OG image
+        width: 1200,
+        height: 630,
+        alt: "GameRev - Video Game Ratings",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GameRev - Trusted Video Game Ratings",
+    description: "Discover the highest-rated games from critics and players alike.",
+    images: ["/og-image.png"], // TODO: Generate a proper OG image
+  },
+  robots: { // TODO: Update robots.txt
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

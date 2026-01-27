@@ -1,11 +1,16 @@
 "use client";
 
-import { useGame } from "@/lib/context/game-context";
+import { UnifiedGameData } from "@/lib/types/game";
 import { Badge } from "./ui/badge";
 import { Calendar } from "lucide-react";
 
-export function GameHero() {
-    const { game, activeSource } = useGame();
+interface GameHeroProps {
+    game: UnifiedGameData;
+    activeSource?: string;
+}
+
+export function GameHero({ game, activeSource: propActiveSource }: GameHeroProps) {
+    const activeSource = propActiveSource || game.primarySource;
     const sourceData = game.sources[activeSource] || Object.values(game.sources)[0];
 
     const coverUrl = sourceData.coverUrl

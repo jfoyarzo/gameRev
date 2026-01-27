@@ -1,12 +1,14 @@
 "use client";
 
-import { useGame } from "@/lib/context/game-context";
+import { UnifiedGameData } from "@/lib/types/game";
 import { Star } from "lucide-react";
 import { RATING_EXCELLENT_THRESHOLD, RATING_GOOD_THRESHOLD } from "@/lib/constants";
 
-export function GameRatings() {
-    const { game } = useGame();
+interface GameRatingsProps {
+    game: UnifiedGameData;
+}
 
+export function GameRatings({ game }: GameRatingsProps) {
     const allRatings = Object.values(game.sources).flatMap(s => s.ratings);
 
     return (

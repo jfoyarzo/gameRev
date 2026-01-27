@@ -1,14 +1,9 @@
 import { CACHE_REVALIDATE_SECONDS } from "@/lib/constants";
+import { appConfig } from "@/lib/dal/config";
 
-const RAWG_API_KEY = process.env.RAWG_API_KEY;
+const RAWG_API_KEY = appConfig.rawg.apiKey;
 
 export async function fetchRAWG<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
-    if (!RAWG_API_KEY) {
-        console.warn("Missing RAWG_API_KEY in .env.local");
-        // We throw an error instead of returning null to ensure the caller handles failure
-        throw new Error("Missing RAWG_API_KEY in .env.local");
-    }
-
     const queryParams = new URLSearchParams({
         ...params,
         key: RAWG_API_KEY,
