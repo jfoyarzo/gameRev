@@ -1,14 +1,11 @@
 import { cache } from "react";
 import { CACHE_REVALIDATE_SECONDS } from "@/lib/constants";
+import { appConfig } from "@/lib/dal/config";
 
-const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID!;
-const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET!;
+const TWITCH_CLIENT_ID = appConfig.twitch.clientId;
+const TWITCH_CLIENT_SECRET = appConfig.twitch.clientSecret;
 
 export const getAccessToken = cache(async () => {
-    if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
-        throw new Error("Missing Twitch Credentials in .env.local");
-    }
-
     const response = await fetch(
         `https://id.twitch.tv/oauth2/token?client_id=${TWITCH_CLIENT_ID}&client_secret=${TWITCH_CLIENT_SECRET}&grant_type=client_credentials`,
         {
