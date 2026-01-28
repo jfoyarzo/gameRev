@@ -74,8 +74,7 @@ export class RawgAdapter extends BaseAdapter {
                     screenshots,
                     ratings,
                     releaseDate: game.released,
-                    developer: game.developers?.[0]?.name,
-                    raw: game
+                    developer: game.developers?.[0]?.name
                 };
             },
             "Details Fetch Failed",

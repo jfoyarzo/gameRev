@@ -15,7 +15,7 @@ export default function GameNotFound() {
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold">Game Not Found</h1>
                     <p className="text-muted-foreground">
-                        We couldn't find the game you're looking for. It may have been removed or doesn't exist in our database.
+                        We couldn&apos;t find the game you&apos;re looking for. It may have been removed or doesn&apos;t exist in our database.
                     </p>
                 </div>
 

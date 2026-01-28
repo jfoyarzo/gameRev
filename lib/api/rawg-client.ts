@@ -1,3 +1,4 @@
+import 'server-only';
 import { CACHE_REVALIDATE_SECONDS } from "@/lib/constants";
 import { appConfig } from "@/lib/dal/config";
 

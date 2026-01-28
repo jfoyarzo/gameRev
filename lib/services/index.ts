@@ -1,17 +1,15 @@
-import { IgdbAdapter } from "@/lib/adapters/igdb-adapter";
-import { RawgAdapter } from "@/lib/adapters/rawg-adapter";
+import 'server-only';
+import { getEnabledAdapters } from "@/lib/adapters/registry";
 import { SearchService } from "./search";
-import { GameService } from "./game-service";
+import { GameService, setGameServiceInstance } from "./game-service";
 
-const igdbAdapter = new IgdbAdapter();
-const rawgAdapter = new RawgAdapter();
+const adapters = getEnabledAdapters();
 
-export const searchService = new SearchService([
-    igdbAdapter,
-    rawgAdapter
-]);
+export const searchService = new SearchService(adapters);
+export const gameService = new GameService(adapters);
 
-export const gameService = new GameService([
-    igdbAdapter,
-    rawgAdapter
-]);
+// Set the singleton instance for preloading
+setGameServiceInstance(gameService);
+
+// Re-export preload functions for use in Server Components
+export { preloadGame } from "./game-service";
