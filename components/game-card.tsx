@@ -6,7 +6,7 @@ import { RATING_EXCELLENT_THRESHOLD, RATING_GOOD_THRESHOLD } from "@/lib/constan
 
 interface GameCardProps {
     game: {
-        id: number;
+        id: string | number;
         sourceIds?: Record<string, string | number>;
         name: string;
         releaseDate?: string;

@@ -54,7 +54,7 @@ export default async function Home() {
             <GameCard
               key={Object.values(game.sourceIds).join("-")}
               game={{
-                id: Number(game.sourceIds.IGDB || Object.values(game.sourceIds)[0]),
+                id: game.sourceIds.IGDB || Object.values(game.sourceIds)[0],
                 sourceIds: game.sourceIds,
                 name: game.name,
                 releaseDate: game.releaseDate,
@@ -88,7 +88,7 @@ export default async function Home() {
             <GameCard
               key={Object.values(game.sourceIds).join("-")}
               game={{
-                id: Number(game.sourceIds.IGDB || Object.values(game.sourceIds)[0]),
+                id: game.sourceIds.IGDB || Object.values(game.sourceIds)[0],
                 sourceIds: game.sourceIds,
                 name: game.name,
                 releaseDate: game.releaseDate,
