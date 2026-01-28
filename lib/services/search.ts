@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SearchAdapter, SearchResult } from "@/lib/types/search";
 import { normalizeGameName } from "@/lib/adapters/adapter-utils";
 import {
@@ -23,17 +24,18 @@ export class SearchService {
     /**
      * Searches across all registered adapters and aggregates results.
      * Results from the same game across different sources are merged together.
+     * Uses cache() for request memoization to prevent duplicate searches within the same request.
      * 
      * @param query The search query string
      * @returns Aggregated and deduplicated search results, sorted by rating
      */
-    async search(query: string): Promise<SearchResult[]> {
+    search = cache(async (query: string): Promise<SearchResult[]> => {
         const promises = this.adapters.map(adapter => adapter.search(query));
         const resultsArrays = await Promise.all(promises);
         const allResults = resultsArrays.flat();
 
         return this.aggregateResults(allResults);
-    }
+    });
 
     /**
      * Aggregates search results by merging entries that represent the same game.

@@ -3,6 +3,10 @@ import { GameAdapter } from "../types/adapter";
 import { UnifiedGameData, GameSourceInfo } from "../types/game";
 import { SearchResult } from "../types/search";
 
+const PRIMARY_SOURCE_NAME = "IGDB";
+const DEFAULT_COVER_IMAGE = "/placeholder-game.jpg";
+const DEFAULT_GAME_NAME = "Unknown Game";
+
 export class GameService {
     private adapters: GameAdapter[] = [];
 
@@ -31,14 +35,14 @@ export class GameService {
         results.forEach(res => {
             if (res) {
                 sources[res.sourceName] = res;
-                // Prefer IGDB as primary source if available
-                if (res.sourceName === "IGDB") {
+                // Prefer primary source if available
+                if (res.sourceName === PRIMARY_SOURCE_NAME) {
                     primaryResult = res;
                 }
             }
         });
 
-        // If IGDB is not available or didn't return data, pick the first one that did
+        // If primary source is not available or didn't return data, pick the first one that did
         if (!primaryResult) {
             primaryResult = results.find(r => r !== null) || null;
         }
@@ -48,8 +52,8 @@ export class GameService {
         // Merge logic
         const unified: UnifiedGameData = {
             sourceIds,
-            name: primaryResult.name || name || "Unknown Game",
-            mainCoverUrl: primaryResult.coverUrl || results.find(r => r?.coverUrl)?.coverUrl || "/placeholder-game.jpg",
+            name: primaryResult.name || name || DEFAULT_GAME_NAME,
+            mainCoverUrl: primaryResult.coverUrl || results.find(r => r?.coverUrl)?.coverUrl || DEFAULT_COVER_IMAGE,
             mainDescription: primaryResult.description || results.find(r => r?.description)?.description,
             releaseDate: primaryResult.releaseDate || results.find(r => r?.releaseDate)?.releaseDate,
             developer: primaryResult.developer || results.find(r => r?.developer)?.developer,
@@ -60,11 +64,13 @@ export class GameService {
         return unified;
     });
 
+    /**
+     * Fetches popular games from the primary adapter, with fallback to first available.
+     */
     async getPopularGames(limit?: number): Promise<SearchResult[]> {
-        // Prefer IGDB for popular games lists if available
-        const igdbAdapter = this.adapters.find(a => a.name === "IGDB");
-        if (igdbAdapter) {
-            return igdbAdapter.getPopularGames(limit);
+        const primaryAdapter = this.adapters.find(a => a.name === PRIMARY_SOURCE_NAME);
+        if (primaryAdapter) {
+            return primaryAdapter.getPopularGames(limit);
         }
 
         // Fallback to first adapter
@@ -75,11 +81,13 @@ export class GameService {
         return [];
     }
 
+    /**
+     * Fetches new game releases from the primary adapter, with fallback to first available.
+     */
     async getNewGames(limit?: number): Promise<SearchResult[]> {
-        // Prefer IGDB for new releases lists if available
-        const igdbAdapter = this.adapters.find(a => a.name === "IGDB");
-        if (igdbAdapter) {
-            return igdbAdapter.getNewGames(limit);
+        const primaryAdapter = this.adapters.find(a => a.name === PRIMARY_SOURCE_NAME);
+        if (primaryAdapter) {
+            return primaryAdapter.getNewGames(limit);
         }
 
         // Fallback to first adapter
@@ -88,5 +96,31 @@ export class GameService {
         }
 
         return [];
+    }
+}
+
+// Create a singleton instance for the preload function
+// Note: The actual instance is created in index.ts, this is just for the preload function signature
+let _gameServiceInstance: GameService | null = null;
+
+/**
+ * Sets the game service instance for preloading.
+ * Called internally by the services index.
+ */
+export function setGameServiceInstance(instance: GameService) {
+    _gameServiceInstance = instance;
+}
+
+/**
+ * Preload function for warming the cache before components render.
+ * Use in Page components to initiate data fetching early and avoid waterfalls.
+ */
+export function preloadGame(
+    sourceIds: Record<string, string | number>,
+    name?: string,
+    releaseDate?: string
+): void {
+    if (_gameServiceInstance) {
+        void _gameServiceInstance.getGame(sourceIds, name, releaseDate);
     }
 }

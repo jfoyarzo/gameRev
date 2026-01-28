@@ -12,7 +12,6 @@ export interface GameSourceInfo {
     ratings: RatingData[];
     releaseDate?: string;
     developer?: string;
-    raw?: unknown;
 }
 
 export interface UnifiedGameData {
