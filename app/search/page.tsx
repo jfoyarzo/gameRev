@@ -35,7 +35,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                         <GameCard
                             key={Object.values(result.sourceIds).join("-")}
                             game={{
-                                id: Number(result.sourceIds.IGDB || Object.values(result.sourceIds)[0]),
+                                id: result.sourceIds.IGDB || Object.values(result.sourceIds)[0],
                                 sourceIds: result.sourceIds,
                                 name: result.name,
                                 releaseDate: result.releaseDate,
