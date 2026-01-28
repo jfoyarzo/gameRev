@@ -3,6 +3,7 @@
 import { UnifiedGameData } from "@/lib/types/game";
 import { Badge } from "./ui/badge";
 import { Calendar } from "lucide-react";
+import Image from "next/image";
 
 interface GameHeroProps {
     game: UnifiedGameData;
@@ -29,7 +30,13 @@ export function GameHero({ game, activeSource: propActiveSource }: GameHeroProps
                 <div className="flex flex-col md:flex-row gap-8 items-end w-full">
                     {/* Cover Art Card */}
                     <div className="hidden md:block w-[200px] shrink-0 rounded-lg overflow-hidden shadow-2xl skew-y-0 hover:skew-y-1 transition-transform border border-white/10 relative group">
-                        <img src={coverUrl} alt={game.name} className="w-full h-auto" />
+                        <Image
+                            src={coverUrl}
+                            alt={game.name}
+                            width={200}
+                            height={300}
+                            className="w-full h-auto"
+                        />
                         <Badge className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md border-white/20">
                             Source: {sourceData.sourceName}
                         </Badge>
