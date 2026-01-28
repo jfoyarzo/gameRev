@@ -73,8 +73,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
                     })),
                     ratings,
                     releaseDate: unixToISODate(game.first_release_date),
-                    developer: game.involved_companies?.[0]?.company?.name,
-                    raw: game
+                    developer: game.involved_companies?.[0]?.company?.name
                 };
             },
             "Details Fetch Failed",
