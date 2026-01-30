@@ -3,6 +3,7 @@
 import { UnifiedGameData } from "@/lib/types/game";
 import { useState } from "react";
 import Image from "next/image";
+import { formatImageUrl } from "@/lib/utils";
 
 interface GameDetailsProps {
     game: UnifiedGameData;
@@ -51,7 +52,7 @@ export function GameDetails({ game }: GameDetailsProps) {
                         {sourceData.screenshots.slice(0, 4).map((shot) => (
                             <div key={shot.id} className="rounded-lg overflow-hidden border bg-card aspect-video group relative">
                                 <Image
-                                    src={shot.url.startsWith('http') ? shot.url : `https:${shot.url.replace("t_thumb", "t_720p")}`}
+                                    src={formatImageUrl(shot.url, "t_720p")}
                                     alt="Screenshot"
                                     fill
                                     className="object-cover transition-transform group-hover:scale-105"

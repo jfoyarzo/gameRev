@@ -4,6 +4,7 @@ import { UnifiedGameData } from "@/lib/types/game";
 import { Badge } from "./ui/badge";
 import { Calendar } from "lucide-react";
 import Image from "next/image";
+import { formatImageUrl } from "@/lib/utils";
 
 interface GameHeroProps {
     game: UnifiedGameData;
@@ -15,7 +16,7 @@ export function GameHero({ game, activeSource: propActiveSource }: GameHeroProps
     const sourceData = game.sources[activeSource] || Object.values(game.sources)[0];
 
     const coverUrl = sourceData.coverUrl
-        ? (sourceData.coverUrl.startsWith('http') ? sourceData.coverUrl : `https:${sourceData.coverUrl.replace("t_thumb", "t_1080p")}`)
+        ? formatImageUrl(sourceData.coverUrl)
         : game.mainCoverUrl;
 
     return (

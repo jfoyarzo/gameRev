@@ -233,8 +233,34 @@ export class SearchService {
      * @returns Merged search result
      */
     private mergeResults(existing: SearchResult, incoming: SearchResult): SearchResult {
-        // Pick first truthy coverUrl (handles empty strings, null, undefined)
-        const coverUrl = this.pickFirstTruthy(existing.coverUrl, incoming.coverUrl);
+        // Priority map for cover images (lower is better)
+        const priorityMap: Record<string, number> = {
+            "IGDB": 1,
+            "OpenCritic": 2,
+            "RAWG": 4
+        };
+        const DEFAULT_PRIORITY = 3;
+
+        const getPriority = (source?: string) => source ? (priorityMap[source] || DEFAULT_PRIORITY) : DEFAULT_PRIORITY;
+
+        let coverUrl = existing.coverUrl;
+        let coverSource = existing.coverSource;
+
+        if (incoming.coverUrl) {
+            if (!existing.coverUrl) {
+                coverUrl = incoming.coverUrl;
+                coverSource = incoming.coverSource;
+            } else {
+                const existingPriority = getPriority(existing.coverSource);
+                const incomingPriority = getPriority(incoming.coverSource);
+
+                if (incomingPriority < existingPriority) {
+                    coverUrl = incoming.coverUrl;
+                    coverSource = incoming.coverSource;
+                }
+            }
+        }
+
         const releaseDate = this.pickFirstTruthy(existing.releaseDate, incoming.releaseDate);
 
         const merged: SearchResult = {
@@ -242,6 +268,7 @@ export class SearchService {
             sourceIds: { ...existing.sourceIds, ...incoming.sourceIds },
             name: existing.name.length >= incoming.name.length ? existing.name : incoming.name,
             coverUrl,
+            coverSource,
             releaseDate,
             rating: existing.rating ?? incoming.rating,
             sources: Array.from(new Set([...existing.sources, ...incoming.sources])),

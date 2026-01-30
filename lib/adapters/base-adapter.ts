@@ -127,6 +127,7 @@ export abstract class BaseAdapter implements GameAdapter {
             sourceIds: { [config.sourceName]: config.getId(sourceData) },
             name: config.getName(sourceData),
             coverUrl: config.getCoverUrl?.(sourceData),
+            coverSource: config.getCoverUrl?.(sourceData) ? config.sourceName : undefined,
             releaseDate: config.getReleaseDate?.(sourceData),
             rating: config.getRating?.(sourceData),
             sources: [config.sourceName],
