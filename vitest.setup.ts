@@ -9,6 +9,7 @@ vi.mock('server-only', () => { return {}; });
 vi.stubEnv('TWITCH_CLIENT_ID', 'test_id');
 vi.stubEnv('TWITCH_CLIENT_SECRET', 'test_secret');
 vi.stubEnv('RAWG_API_KEY', 'test_key');
+vi.stubEnv('OPENCRITIC_API_KEY', 'test_opencritic_key');
 
 afterEach(() => {
     cleanup();
