@@ -16,6 +16,9 @@ interface AppConfig {
     rawg: {
         apiKey: string;
     };
+    opencritic: {
+        rapidApiKey: string;
+    };
 }
 
 function getRequiredEnvVar(name: string): string {
@@ -37,6 +40,9 @@ export const appConfig: AppConfig = {
     },
     rawg: {
         apiKey: getRequiredEnvVar("RAWG_API_KEY"),
+    },
+    opencritic: {
+        rapidApiKey: getRequiredEnvVar("OPENCRITIC_API_KEY"),
     },
 };
 
