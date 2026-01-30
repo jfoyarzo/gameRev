@@ -66,23 +66,23 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
 
     async getGameDetails(
         sourceIds: Record<string, string | number>,
-        name?: string,
-        releaseDate?: string
+        name?: string
     ): Promise<GameSourceInfo | null> {
         return this.handleError(
             async () => {
-                let game: OpenCriticGame | null = null;
                 const openCriticId = sourceIds.OpenCritic;
 
-                if (openCriticId) {
-                    game = await getOpenCriticGame(Number(openCriticId));
-                } else if (name) {
-                    // Fallback: search by name and match
-                    game = await this.findGameByNameAndDate(name, releaseDate);
+                // Only fetch if we have an OpenCritic ID from the search phase
+                // This prevents unnecessary search API calls (25/day limit on free tier)
+                if (!openCriticId) {
+                    this.logDetailsFetch(name || "unknown", false);
+                    return null;
                 }
 
+                const game = await getOpenCriticGame(Number(openCriticId));
+
                 if (!game) {
-                    this.logDetailsFetch(openCriticId || name || "unknown", false);
+                    this.logDetailsFetch(openCriticId, false);
                     return null;
                 }
 
@@ -137,34 +137,7 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
 
     // --- Private Helper Methods ---
 
-    private async findGameByNameAndDate(
-        name: string,
-        releaseDate?: string
-    ): Promise<OpenCriticGame | null> {
-        const results = await searchOpenCritic(name);
-        if (results.length === 0) return null;
 
-        // For OpenCritic search, we need to fetch details to compare dates
-        const limitedResults = results.slice(0, NAME_SEARCH_LIMIT);
-
-        for (const result of limitedResults) {
-            const game = await getOpenCriticGame(result.id);
-            if (game) {
-                const match = this.findMatchingGame(
-                    [game],
-                    name,
-                    releaseDate,
-                    (g) => g.name,
-                    (g) => parseDate(this.formatDate(g.firstReleaseDate))
-                );
-                if (match) return match;
-            }
-        }
-
-        // CONSERVATIVE: If no date match found, do NOT return a potentially wrong game.
-        // This prevents e.g. Cuphead (original) from being matched with Cuphead (Tesla port).
-        return null;
-    }
 
     private extractRatings(game: OpenCriticGame): RatingData[] {
         const ratings: RatingData[] = [];
