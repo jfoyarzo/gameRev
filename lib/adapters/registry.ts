@@ -2,9 +2,10 @@ import 'server-only';
 import { GameAdapter } from "@/lib/types/adapter";
 import { IgdbAdapter } from "./igdb-adapter";
 import { RawgAdapter } from "./rawg-adapter";
+import { OpencriticAdapter } from "./opencritic-adapter";
 
 /** Unique adapter source names */
-export type AdapterName = 'IGDB' | 'RAWG';
+export type AdapterName = 'IGDB' | 'RAWG' | 'OpenCritic';
 
 interface AdapterRegistryEntry {
     adapter: GameAdapter;
@@ -24,6 +25,7 @@ interface AdapterRegistryEntry {
 const REGISTRY: Record<AdapterName, AdapterRegistryEntry> = {
     IGDB: { adapter: new IgdbAdapter(), priority: 1, enabled: true },
     RAWG: { adapter: new RawgAdapter(), priority: 2, enabled: true },
+    OpenCritic: { adapter: new OpencriticAdapter(), priority: 3, enabled: true },
 };
 
 /** Functions for interacting with the adapter registry */
