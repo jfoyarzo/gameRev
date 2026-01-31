@@ -17,7 +17,7 @@ interface GameCardProps {
 }
 
 export function GameCard({ game }: GameCardProps) {
-    const coverUrl = formatImageUrl(game.cover?.url, "t_720p") || "/placeholder-game.jpg";
+    const coverUrl = formatImageUrl(game.cover?.url, { replaceThumbnail: "t_720p" });
 
     const rating = game.total_rating ? Math.round(game.total_rating) : 0;
 

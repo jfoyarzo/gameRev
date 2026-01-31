@@ -23,28 +23,34 @@ describe('utils', () => {
     });
 
     describe('formatImageUrl', () => {
-        it('should return empty string for empty url', () => {
-            expect(formatImageUrl('')).toBe('');
+        it('should return placeholder for null/undefined/empty url', () => {
+            expect(formatImageUrl('')).toBe('/placeholder-game.jpg');
+            expect(formatImageUrl(null)).toBe('/placeholder-game.jpg');
+            expect(formatImageUrl(undefined)).toBe('/placeholder-game.jpg');
         });
 
-        it('should return original url if it starts with http', () => {
+        it('should return custom placeholder when provided', () => {
+            expect(formatImageUrl('', { placeholder: '/custom.jpg' })).toBe('/custom.jpg');
+        });
+
+        it('should add protocol to protocol-relative urls', () => {
+            const url = '//images.igdb.com/igdb/image/upload/t_thumb/test.jpg';
+            expect(formatImageUrl(url)).toBe('https://images.igdb.com/igdb/image/upload/t_thumb/test.jpg');
+        });
+
+        it('should replace thumbnail when specified', () => {
+            const url = '//images.igdb.com/igdb/image/upload/t_thumb/test.jpg';
+            expect(formatImageUrl(url, { replaceThumbnail: 't_720p' })).toBe('https://images.igdb.com/igdb/image/upload/t_720p/test.jpg');
+        });
+
+        it('should handle urls with existing protocol', () => {
             const url = 'https://example.com/image.jpg';
             expect(formatImageUrl(url)).toBe(url);
         });
 
-        it('should format protocol-relative url with default resolution', () => {
-            const url = '//images.igdb.com/igdb/image/upload/t_thumb/test.jpg';
-            expect(formatImageUrl(url)).toBe('https://images.igdb.com/igdb/image/upload/t_1080p/test.jpg');
-        });
-
-        it('should format protocol-relative url with custom resolution', () => {
-            const url = '//images.igdb.com/igdb/image/upload/t_thumb/test.jpg';
-            expect(formatImageUrl(url, 't_720p')).toBe('https://images.igdb.com/igdb/image/upload/t_720p/test.jpg');
-        });
-
-        it('should handle relative paths unchanged', () => {
-            const url = '/placeholder.jpg';
-            expect(formatImageUrl(url)).toBe(url);
+        it('should not add protocol when addProtocol is false', () => {
+            const url = '//images.igdb.com/test.jpg';
+            expect(formatImageUrl(url, { addProtocol: false })).toBe(url);
         });
     });
 });

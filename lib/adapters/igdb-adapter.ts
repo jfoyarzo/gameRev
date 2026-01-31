@@ -4,7 +4,8 @@ import { fetchIGDB } from "@/lib/api/igdb-client";
 import { IGDBGame } from "@/lib/types/igdb";
 import { GameSourceInfo } from "@/lib/types/game";
 import { BaseAdapter } from "./base-adapter";
-import { formatImageUrl, unixToISODate, parseDate } from "./adapter-utils";
+import { unixToISODate, parseDate } from "./adapter-utils";
+import { formatImageUrl } from "@/lib/utils";
 import { NAME_SEARCH_LIMIT, POPULAR_GAMES_LIMIT, NEW_GAMES_LIMIT, ONE_SECOND_MS, SEARCH_PAGE_SIZE_IGDB } from "@/lib/constants";
 
 export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAdapter {

@@ -3,6 +3,7 @@ import { SearchAdapter, SearchResult } from "@/lib/types/search";
 import { GameSourceInfo } from "@/lib/types/game";
 import { BaseAdapter } from "./base-adapter";
 import { parseDate, calculateSearchScore } from "./adapter-utils";
+import { formatImageUrl } from "@/lib/utils";
 import {
     searchOpenCritic,
     getOpenCriticGame,
@@ -183,11 +184,7 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
             game.images?.box?.og ||
             game.images?.masthead?.og;
 
-        if (imagePath) {
-            return this.formatImageUrl(imagePath);
-        }
-
-        return undefined;
+        return imagePath ? this.formatOpenCriticImageUrl(imagePath) : undefined;
     }
 
     private extractScreenshots(game: OpenCriticGame): { id: string | number; url: string }[] {
@@ -197,7 +194,7 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
             .filter(s => s.og || s.sm)
             .map((s, index) => ({
                 id: s._id || `oc-screenshot-${index}`,
-                url: this.formatImageUrl(s.og || s.sm || ''),
+                url: this.formatOpenCriticImageUrl(s.og || s.sm || ''),
             }));
     }
 
@@ -216,22 +213,19 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
         }
     }
 
-    private formatImageUrl(path: string): string {
+    /**
+     * Converts OpenCritic relative image paths to full URLs.
+     * Handles both relative paths (e.g., "game/123/o/image.jpg") and absolute URLs.
+     */
+    private formatOpenCriticImageUrl(path: string): string {
         if (!path) return '';
 
-        // Handle protocol-relative URLs (e.g., //c.opencritic.com/images/...)
-        if (path.startsWith('//')) {
-            return `https:${path}`;
-        }
+        // If already a full URL, pass through to global formatter
+        const fullPath = path.startsWith('http') || path.startsWith('//')
+            ? path
+            : `${OPENCRITIC_IMAGE_BASE}${path}`;
 
-        // Handle absolute URLs
-        if (path.startsWith('http')) {
-            return path;
-        }
-
-        // Handle relative paths (e.g., game/463/o/image.jpg)
-        // These need the img.opencritic.com base URL
-        return `${OPENCRITIC_IMAGE_BASE}${path}`;
+        return formatImageUrl(fullPath);
     }
 
     private mapSearchResultToSearchResult(game: OpenCriticSearchResult): SearchResult {
@@ -249,7 +243,7 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
             getName: (g) => g.name,
             getCoverUrl: (g) => {
                 const imagePath = g.images?.square?.og || g.images?.box?.og;
-                return imagePath ? this.formatImageUrl(imagePath) : undefined;
+                return imagePath ? this.formatOpenCriticImageUrl(imagePath) : undefined;
             },
             getReleaseDate: (g) => this.formatDate(g.firstReleaseDate),
             getRating: (g) => g.topCriticScore,

@@ -52,7 +52,7 @@ export function GameDetails({ game }: GameDetailsProps) {
                         {sourceData.screenshots.slice(0, 4).map((shot) => (
                             <div key={shot.id} className="rounded-lg overflow-hidden border bg-card aspect-video group relative">
                                 <Image
-                                    src={formatImageUrl(shot.url, "t_720p")}
+                                    src={formatImageUrl(shot.url, { replaceThumbnail: "t_720p" })}
                                     alt="Screenshot"
                                     fill
                                     className="object-cover transition-transform group-hover:scale-105"

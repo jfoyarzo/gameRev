@@ -4,7 +4,8 @@ import { fetchRAWG } from "@/lib/api/rawg-client";
 import { RAWGGame, RAWGSearchResponse } from "@/lib/types/rawg";
 import { RatingData } from "@/lib/types/ratings";
 import { BaseAdapter } from "./base-adapter";
-import { formatImageUrl, parseDate } from "./adapter-utils";
+import { parseDate } from "./adapter-utils";
+import { formatImageUrl } from "@/lib/utils";
 import {
     SEARCH_PAGE_SIZE_RAWG,
     NAME_SEARCH_LIMIT,
