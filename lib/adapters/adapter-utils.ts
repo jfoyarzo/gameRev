@@ -10,12 +10,85 @@ import {
 } from "@/lib/constants";
 
 /**
- * Normalizes a game name for comparison by removing special characters and converting to lowercase
- * @param name The game name to normalize
- * @returns Normalized name containing only lowercase alphanumeric characters
+ * Roman numeral to Arabic number mapping (common game sequel numbers)
+ */
+const ROMAN_TO_ARABIC: [RegExp, string][] = [
+    [/\bxiii\b/gi, "13"],
+    [/\bxii\b/gi, "12"],
+    [/\bxi\b/gi, "11"],
+    [/\bviii\b/gi, "8"],
+    [/\bvii\b/gi, "7"],
+    [/\bvi\b/gi, "6"],
+    [/\biv\b/gi, "4"],
+    [/\bix\b/gi, "9"],
+    [/\biii\b/gi, "3"],
+    [/\bii\b/gi, "2"],
+    [/\bv\b/gi, "5"],
+    [/\bx\b/gi, "10"],
+];
+
+/**
+ * Converts Roman numerals to Arabic in a string for consistent comparison.
+ * e.g., "Street Fighter V" → "Street Fighter 5"
+ */
+export function convertRomanNumerals(text: string): string {
+    let result = text;
+    for (const [pattern, replacement] of ROMAN_TO_ARABIC) {
+        result = result.replace(pattern, replacement);
+    }
+    return result;
+}
+
+/**
+ * Normalizes a game name for comparison:
+ * 1. Converts Roman numerals to Arabic (V→5, IV→4, etc.)
+ * 2. Removes special characters
+ * 3. Converts to lowercase
  */
 export function normalizeGameName(name: string): string {
-    return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const withArabic = convertRomanNumerals(name);
+    return withArabic.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * Calculates a relevance score for how well a game name matches a search query.
+ * Higher score = better match.
+ * 
+ * @param query The search query
+ * @param resultName The game name to score
+ * @returns Score from 0-100
+ */
+export function calculateSearchScore(query: string, resultName: string): number {
+    const normalizedQuery = normalizeGameName(query);
+    const normalizedResult = normalizeGameName(resultName);
+
+    // Exact match
+    if (normalizedResult === normalizedQuery) {
+        return 100;
+    }
+
+    // Result starts with query (e.g., "Street Fighter 5" matches "Street Fighter 5: Champion Edition")
+    if (normalizedResult.startsWith(normalizedQuery)) {
+        return 90;
+    }
+
+    // Query starts with result (e.g., "Street Fighter 5 Champion" matches "Street Fighter 5")
+    if (normalizedQuery.startsWith(normalizedResult)) {
+        return 85;
+    }
+
+    // Result contains query
+    if (normalizedResult.includes(normalizedQuery)) {
+        return 70;
+    }
+
+    // Query contains result (for short names like "Hades")
+    if (normalizedQuery.includes(normalizedResult) && normalizedResult.length >= 4) {
+        return 60;
+    }
+
+    // No significant match
+    return 0;
 }
 
 /**

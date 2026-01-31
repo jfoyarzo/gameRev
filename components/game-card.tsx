@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
 import { Star } from "lucide-react";
+import { formatImageUrl } from "@/lib/utils";
 import { RATING_EXCELLENT_THRESHOLD, RATING_GOOD_THRESHOLD } from "@/lib/constants";
 
 interface GameCardProps {
@@ -16,11 +17,7 @@ interface GameCardProps {
 }
 
 export function GameCard({ game }: GameCardProps) {
-    const coverUrl = game.cover?.url
-        ? (game.cover.url.startsWith("http")
-            ? game.cover.url
-            : `https:${game.cover.url.replace("t_thumb", "t_720p")}`)
-        : "/placeholder-game.jpg";
+    const coverUrl = formatImageUrl(game.cover?.url, "t_720p") || "/placeholder-game.jpg";
 
     const rating = game.total_rating ? Math.round(game.total_rating) : 0;
 

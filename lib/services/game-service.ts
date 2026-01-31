@@ -42,6 +42,12 @@ export class GameService {
             }
         });
 
+        // Debug logging to track which sources contributed
+        const contributedSources = Object.keys(sources);
+        if (contributedSources.length > 0) {
+            console.log(`[GameService] Merged data from sources: ${contributedSources.join(', ')} for game "${name || 'unknown'}"`);
+        }
+
         // If primary source is not available or didn't return data, pick the first one that did
         if (!primaryResult) {
             primaryResult = results.find(r => r !== null) || null;
