@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { IgdbAdapter } from '../igdb-adapter';
 import * as igdbClient from '@/lib/api/igdb-client';
 

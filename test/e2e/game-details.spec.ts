@@ -49,9 +49,6 @@ test('game details flow', async ({ page }) => {
     const gameCard = page.locator('a[href*="/game/"]').first();
     await expect(gameCard).toBeVisible({ timeout: 10000 });
 
-    // Get the name of the game to verify later
-    const gameTitle = await gameCard.innerText();
-
     // 4. Click on a game card
     await gameCard.click();
 

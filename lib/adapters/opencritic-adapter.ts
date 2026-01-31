@@ -2,7 +2,7 @@ import { RatingAdapter, RatingData } from "@/lib/types/ratings";
 import { SearchAdapter, SearchResult } from "@/lib/types/search";
 import { GameSourceInfo } from "@/lib/types/game";
 import { BaseAdapter } from "./base-adapter";
-import { parseDate, calculateSearchScore } from "./adapter-utils";
+import { calculateSearchScore } from "./adapter-utils";
 import { formatImageUrl } from "@/lib/utils";
 import {
     searchOpenCritic,
@@ -15,7 +15,6 @@ import {
     OpenCriticSearchResult,
     OpenCriticGameListItem,
 } from "@/lib/types/opencritic";
-import { NAME_SEARCH_LIMIT } from "@/lib/constants";
 
 /** Base URL for OpenCritic images */
 const OPENCRITIC_IMAGE_BASE = 'https://img.opencritic.com/';
