@@ -51,11 +51,40 @@ export class SearchService {
         // Filter out low-relevance results
         const relevantResults = scoredResults
             .filter(({ score }) => score >= MIN_RELEVANCE_SCORE)
-            .sort((a, b) => b.score - a.score) // Sort by score before merging
+            .sort((a, b) => {
+                // Primary Sort: Release Type Tier
+                const tierA = this.getReleaseTypeTier(a.result);
+                const tierB = this.getReleaseTypeTier(b.result);
+
+                if (tierA !== tierB) {
+                    return tierA - tierB; // Lower tier number is better
+                }
+
+                // Secondary Sort: Search Score
+                return b.score - a.score;
+            })
             .map(({ result }) => result);
 
         return this.aggregateResults(relevantResults);
     });
+
+    /**
+     * Determines the sorting tier for a search result.
+     * Tier 1: Base Games with > 2 platforms (Major Multi-platform)
+     * Tier 2: Base Games with <= 2 platforms (Ports/Exclusives)
+     * Tier 3: DLCs, Expansions, Bundles, Unknown
+     */
+    private getReleaseTypeTier(result: SearchResult): number {
+        const isBaseGame = result.releaseType === 'BASE_GAME' || !result.releaseType;
+        const platformCount = result.platforms?.length || 0;
+
+        if (isBaseGame) {
+            if (platformCount > 2) return 1;
+            return 2;
+        }
+
+        return 3;
+    }
 
     /**
      * Aggregates search results by merging entries that represent the same game.
@@ -113,9 +142,14 @@ export class SearchService {
             return false;
         }
 
-        // Case 1: Exact name match + within 1 month date tolerance
-        if (nameA === nameB && this.isWithinOneMonth(a, b)) {
-            return true;
+        // Case 1: Exact name match
+        if (nameA === nameB) {
+            // Case 1a: Strong date match
+            if (this.isWithinOneMonth(a, b)) return true;
+
+            // Case 1b: One lacks release date (common with Search API results)
+            // If names are identical after normalization, we accept the merge
+            if (!a.releaseDate || !b.releaseDate) return true;
         }
 
         // Case 2: Substring match + exact release date match
@@ -139,8 +173,12 @@ export class SearchService {
 
         // If either lacks platforms, we can't verify - be conservative and don't merge
         if (platformsA.length === 0 || platformsB.length === 0) {
-            // Only merge if we have strong date match
-            return this.isWithinOneMonth(a, b);
+            // If we have dates, check them to be safe
+            if (a.releaseDate && b.releaseDate) {
+                return this.isWithinOneMonth(a, b);
+            }
+            // If missing dates or platforms, rely on the name match in shouldMerge
+            return true;
         }
 
         // Normalize platform names for comparison
@@ -272,7 +310,8 @@ export class SearchService {
             releaseDate,
             rating: existing.rating ?? incoming.rating,
             sources: Array.from(new Set([...existing.sources, ...incoming.sources])),
-            platforms: Array.from(new Set([...(existing.platforms || []), ...(incoming.platforms || [])]))
+            platforms: Array.from(new Set([...(existing.platforms || []), ...(incoming.platforms || [])])),
+            releaseType: this.pickBestReleaseType(existing.releaseType, incoming.releaseType)
         };
 
         return merged;
@@ -287,5 +326,28 @@ export class SearchService {
             if (value) return value;
         }
         return undefined;
+    }
+
+    /**
+     * Resolves conflict between two release types, prioritizing specific types over generic/unknown ones.
+     * Priority: DLC/EXPANSION/BUNDLE > BASE_GAME > UNKNOWN
+     */
+    private pickBestReleaseType(
+        a: SearchResult['releaseType'],
+        b: SearchResult['releaseType']
+    ): SearchResult['releaseType'] {
+        if (!a || a === 'UNKNOWN') return b || 'UNKNOWN';
+        if (!b || b === 'UNKNOWN') return a;
+
+        const specificTypes = new Set(['DLC', 'EXPANSION', 'BUNDLE']);
+
+        // If one is specific and the other is BASE_GAME, prefer specific
+        // (This assumes we trust the specific source more than the one saying it's a base game,
+        // which helps when OpenCritic defaults to BASE_GAME but IGDB knows it's a DLC)
+        if (specificTypes.has(a) && b === 'BASE_GAME') return a;
+        if (specificTypes.has(b) && a === 'BASE_GAME') return b;
+
+        // If both are specific or both are BASE_GAME, stick with existing (a)
+        return a;
     }
 }
