@@ -57,6 +57,7 @@ export interface OpenCriticGame {
     name: string;
     description?: string;
     url?: string;
+    type?: string;
 
     // Ratings
     topCriticScore: number;

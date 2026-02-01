@@ -75,7 +75,9 @@ export class RawgAdapter extends BaseAdapter {
                     screenshots,
                     ratings,
                     releaseDate: game.released,
-                    developer: game.developers?.[0]?.name
+                    developer: game.developers?.[0]?.name,
+                    platforms: game.platforms?.map(p => p.platform.name) || [],
+                    releaseType: (game.parents_count && game.parents_count > 0) ? "DLC" : "BASE_GAME"
                 };
             },
             "Details Fetch Failed",
@@ -144,7 +146,8 @@ export class RawgAdapter extends BaseAdapter {
             getCoverUrl: (g) => formatImageUrl(g.background_image),
             getReleaseDate: (g) => g.released,
             getRating: (g) => g.metacritic || (g.rating ? g.rating * (RATING_NORMALIZED_SCALE / RATING_RAWG_SCALE) : undefined),
-            getPlatforms: (g) => g.platforms?.map(p => p.platform.name) || []
+            getPlatforms: (g) => g.platforms?.map(p => p.platform.name) || [],
+            getReleaseType: (g) => (g.parents_count && g.parents_count > 0) ? "DLC" : "BASE_GAME"
         });
     }
 

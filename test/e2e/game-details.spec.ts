@@ -46,6 +46,9 @@ test('game details flow', async ({ page }) => {
     await searchInput.press('Enter');
 
     // 3. Wait for results
+    // Explicitly wait for navigation to search page to ensure we don't click a home page card
+    await expect(page).toHaveURL(/\/search/);
+
     const gameCard = page.locator('a[href*="/game/"]').first();
     await expect(gameCard).toBeVisible({ timeout: 10000 });
 

@@ -64,7 +64,9 @@ export class GameService {
             releaseDate: primaryResult.releaseDate || results.find(r => r?.releaseDate)?.releaseDate,
             developer: primaryResult.developer || results.find(r => r?.developer)?.developer,
             sources,
-            primarySource: primaryResult.sourceName
+            primarySource: primaryResult.sourceName,
+            platforms: primaryResult.platforms || results.find(r => r?.platforms?.length)?.platforms || [],
+            releaseType: primaryResult.releaseType || results.find(r => r?.releaseType)?.releaseType || "UNKNOWN"
         };
 
         return unified;

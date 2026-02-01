@@ -6,7 +6,18 @@ import { GameSourceInfo } from "@/lib/types/game";
 import { BaseAdapter } from "./base-adapter";
 import { unixToISODate, parseDate } from "./adapter-utils";
 import { formatImageUrl } from "@/lib/utils";
-import { NAME_SEARCH_LIMIT, POPULAR_GAMES_LIMIT, NEW_GAMES_LIMIT, ONE_SECOND_MS, SEARCH_PAGE_SIZE_IGDB } from "@/lib/constants";
+import {
+    NAME_SEARCH_LIMIT,
+    POPULAR_GAMES_LIMIT,
+    NEW_GAMES_LIMIT,
+    ONE_SECOND_MS,
+    SEARCH_PAGE_SIZE_IGDB,
+    IGDB_GAME_TYPE_MAIN,
+    IGDB_GAME_TYPE_DLC,
+    IGDB_GAME_TYPE_EXPANSION,
+    IGDB_GAME_TYPE_BUNDLE,
+    IGDB_GAME_TYPE_STANDALONE_EXPANSION
+} from "@/lib/constants";
 
 export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAdapter {
     name = "IGDB";
@@ -59,6 +70,8 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
 
                 this.logDetailsFetch(game.id, true);
 
+                const releaseType = this.mapGameTypeToReleaseType(game.game_type);
+
                 return {
                     sourceName: "IGDB",
                     name: game.name,
@@ -74,7 +87,9 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
                     })),
                     ratings,
                     releaseDate: unixToISODate(game.first_release_date),
-                    developer: game.involved_companies?.[0]?.company?.name
+                    developer: game.involved_companies?.[0]?.company?.name,
+                    platforms: game.platforms?.map(p => p.name) || [],
+                    releaseType
                 };
             },
             "Details Fetch Failed",
@@ -90,7 +105,8 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
     private async fetchGameById(igdbId: string | number): Promise<IGDBGame | null> {
         const query = `
             fields name, cover.url, summary, first_release_date, involved_companies.company.name, screenshots.url,
-                   total_rating, total_rating_count, aggregated_rating, aggregated_rating_count, rating, rating_count, url;
+                   total_rating, total_rating_count, aggregated_rating, aggregated_rating_count, rating, rating_count, url,
+                   platforms.name, game_type;
             where id = ${igdbId};
         `;
         const games = await fetchIGDB<IGDBGame[]>("/games", query);
@@ -182,7 +198,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
         return this.handleError(
             async () => {
                 const query = `
-                    fields name, cover.url, total_rating, first_release_date, platforms.name;
+                    fields name, cover.url, total_rating, first_release_date, platforms.name, game_type;
                     sort popularity desc;
                     where cover != null & total_rating != null;
                     limit ${limit};
@@ -201,7 +217,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
             async () => {
                 const currentTimestamp = Math.floor(Date.now() / ONE_SECOND_MS);
                 const query = `
-                    fields name, cover.url, total_rating, first_release_date, platforms.name;
+                    fields name, cover.url, total_rating, first_release_date, platforms.name, game_type;
                     sort first_release_date desc;
                     where first_release_date < ${currentTimestamp} & cover != null & total_rating != null;
                     limit ${limit};
@@ -222,7 +238,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
         const sanitizedQuery = query.replace(/"/g, '\\"');
         const igdbQuery = `
             search "${sanitizedQuery}";
-            fields name, cover.url, total_rating, summary, first_release_date, platforms.name;
+            fields name, cover.url, total_rating, summary, first_release_date, platforms.name, game_type;
             where cover != null;
             limit ${limit};
         `;
@@ -243,7 +259,26 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
             }),
             getReleaseDate: (g) => unixToISODate(g.first_release_date),
             getRating: (g) => g.total_rating,
-            getPlatforms: (g) => g.platforms?.map(p => p.name) || []
+            getPlatforms: (g) => g.platforms?.map(p => p.name) || [],
+            getReleaseType: (g) => this.mapGameTypeToReleaseType(g.game_type)
         });
+    }
+
+    private mapGameTypeToReleaseType(gameType?: number): "BASE_GAME" | "DLC" | "BUNDLE" | "EXPANSION" | "UNKNOWN" {
+        if (gameType === undefined) return "UNKNOWN";
+
+        switch (gameType) {
+            case IGDB_GAME_TYPE_MAIN:
+                return "BASE_GAME";
+            case IGDB_GAME_TYPE_DLC:
+                return "DLC";
+            case IGDB_GAME_TYPE_EXPANSION:
+            case IGDB_GAME_TYPE_STANDALONE_EXPANSION:
+                return "EXPANSION";
+            case IGDB_GAME_TYPE_BUNDLE:
+                return "BUNDLE";
+            default:
+                return "UNKNOWN";
+        }
     }
 }

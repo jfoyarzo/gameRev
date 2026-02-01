@@ -13,6 +13,8 @@ interface GameCardProps {
         releaseDate?: string;
         cover?: { url: string };
         total_rating?: number;
+        platforms?: string[];
+        releaseType?: 'BASE_GAME' | 'DLC' | 'BUNDLE' | 'EXPANSION' | 'UNKNOWN';
     };
 }
 
@@ -53,9 +55,21 @@ export function GameCard({ game }: GameCardProps) {
                 </div>
 
                 <CardContent className="p-4">
-                    <h3 className="font-bold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors mb-2">
                         {game.name}
                     </h3>
+                    <div className="flex flex-wrap gap-1.5">
+                        {game.releaseType && game.releaseType !== 'BASE_GAME' && game.releaseType !== 'UNKNOWN' && (
+                            <span className="bg-amber-500/10 text-amber-500 text-[10px] px-1.5 py-0.5 rounded border border-amber-500/20 font-bold uppercase tracking-wider">
+                                {game.releaseType === 'EXPANSION' ? 'EXP' : game.releaseType}
+                            </span>
+                        )}
+                        {game.platforms && game.platforms.length > 0 && (
+                            <span className="text-xs text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+                                {game.platforms.length === 1 ? game.platforms[0] : `${game.platforms.length} Platforms`}
+                            </span>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </Link>

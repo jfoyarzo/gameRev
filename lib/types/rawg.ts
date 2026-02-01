@@ -54,6 +54,8 @@ export interface RAWGGame {
     publishers?: RAWGPublisher[];
     website?: string;
     reddit_url?: string;
+    parent_games?: { platform: RAWGPlatform }[]; // Structure varies, but checking existence is key
+    parents_count?: number;
 }
 
 export interface RAWGSearchResponse {
