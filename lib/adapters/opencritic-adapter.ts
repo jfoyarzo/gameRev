@@ -98,6 +98,8 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
                     ratings,
                     releaseDate: this.formatDate(game.firstReleaseDate),
                     developer: this.extractDeveloper(game),
+                    platforms: game.Platforms?.map(p => p.name) || [],
+                    releaseType: this.mapOpenCriticType(game.type)
                 };
             },
             "Details Fetch Failed",
@@ -232,6 +234,9 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
             sourceName: "OpenCritic",
             getId: (g) => g.id,
             getName: (g) => g.name,
+            getRating: () => undefined, // Search results don't have rating
+            getPlatforms: () => [], // Search results don't have platforms
+            getReleaseType: () => "BASE_GAME" // Default, will be enriched if needed
         });
     }
 
@@ -263,6 +268,17 @@ export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, Sea
             getReleaseDate: (g) => this.formatDate(g.firstReleaseDate),
             getRating: (g) => g.topCriticScore,
             getPlatforms: (g) => g.Platforms?.map(p => p.name) || [],
+            getReleaseType: (g) => this.mapOpenCriticType(g.type)
         });
+    }
+
+    private mapOpenCriticType(type?: string): "BASE_GAME" | "DLC" | "BUNDLE" | "EXPANSION" | "UNKNOWN" {
+        if (!type) return "UNKNOWN";
+        const t = type.toUpperCase();
+        if (t === "BASE") return "BASE_GAME";
+        if (t === "DLC" || t.includes("DLC")) return "DLC";
+        if (t === "EXPANSION" || t.includes("EXPANSION")) return "EXPANSION";
+        if (t === "BUNDLE") return "BUNDLE";
+        return "UNKNOWN";
     }
 }

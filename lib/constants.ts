@@ -60,3 +60,22 @@ export const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 /** Default number of days used for "one month" tolerance in date matching */
 export const DAYS_IN_MONTH = 31;
 
+// ==================== IGDB Game Types ====================
+// See: https://api-docs.igdb.com/#game-enums
+
+export const IGDB_GAME_TYPE_MAIN = 0;
+export const IGDB_GAME_TYPE_DLC = 1;
+export const IGDB_GAME_TYPE_EXPANSION = 2;
+export const IGDB_GAME_TYPE_BUNDLE = 3;
+export const IGDB_GAME_TYPE_STANDALONE_EXPANSION = 4;
+export const IGDB_GAME_TYPE_MOD = 5;
+export const IGDB_GAME_TYPE_EPISODE = 6;
+export const IGDB_GAME_TYPE_SEASON = 7;
+export const IGDB_GAME_TYPE_REMAKE = 8;
+export const IGDB_GAME_TYPE_REMASTER = 9;
+export const IGDB_GAME_TYPE_EXPANDED_GAME = 10;
+export const IGDB_GAME_TYPE_PORT = 11;
+export const IGDB_GAME_TYPE_FORK = 12;
+export const IGDB_GAME_TYPE_PACK = 13;
+export const IGDB_GAME_TYPE_UPDATE = 14;
+

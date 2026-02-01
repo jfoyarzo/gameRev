@@ -121,6 +121,7 @@ export abstract class BaseAdapter implements GameAdapter {
             getReleaseDate?: (data: T) => string | undefined;
             getRating?: (data: T) => number | undefined;
             getPlatforms?: (data: T) => string[];
+            getReleaseType?: (data: T) => 'BASE_GAME' | 'DLC' | 'BUNDLE' | 'EXPANSION' | 'UNKNOWN';
         }
     ): SearchResult {
         return {
@@ -131,7 +132,8 @@ export abstract class BaseAdapter implements GameAdapter {
             releaseDate: config.getReleaseDate?.(sourceData),
             rating: config.getRating?.(sourceData),
             sources: [config.sourceName],
-            platforms: config.getPlatforms?.(sourceData) || []
+            platforms: config.getPlatforms?.(sourceData) || [],
+            releaseType: config.getReleaseType?.(sourceData)
         };
     }
 }
