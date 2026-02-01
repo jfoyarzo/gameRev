@@ -41,6 +41,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                                 releaseDate: result.releaseDate,
                                 cover: { url: result.coverUrl || "" },
                                 total_rating: result.rating,
+                                platforms: result.platforms,
+                                releaseType: result.releaseType,
                             }}
                         />
                     ))}
