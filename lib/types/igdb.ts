@@ -26,4 +26,5 @@ export interface IGDBGame {
     platforms?: {
         name: string;
     }[];
+    game_type?: number;
 }

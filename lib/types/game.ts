@@ -12,6 +12,8 @@ export interface GameSourceInfo {
     ratings: RatingData[];
     releaseDate?: string;
     developer?: string;
+    platforms?: string[];
+    releaseType?: 'BASE_GAME' | 'DLC' | 'BUNDLE' | 'EXPANSION' | 'UNKNOWN';
 }
 
 export interface UnifiedGameData {
@@ -22,11 +24,12 @@ export interface UnifiedGameData {
     releaseDate?: string;
     developer?: string;
     genres?: string[];
-    platforms?: string[];
 
     // Data segmented by source for tabbed views
     sources: Record<string, GameSourceInfo>;
 
     // Metadata about the primary source
     primarySource: string;
+    platforms?: string[];
+    releaseType?: 'BASE_GAME' | 'DLC' | 'BUNDLE' | 'EXPANSION' | 'UNKNOWN';
 }

@@ -7,6 +7,7 @@ export interface SearchResult {
     rating?: number;
     sources: string[]; // "IGDB", "OpenCritic", etc.
     platforms?: string[];
+    releaseType?: 'BASE_GAME' | 'DLC' | 'BUNDLE' | 'EXPANSION' | 'UNKNOWN';
 }
 
 export interface SearchAdapter {
