@@ -106,4 +106,28 @@ describe('SearchService', () => {
         const merged = results[0];
         expect(merged.coverUrl).toBe('https://rawg.io/gem.jpg');
     });
+    it('merges results when one source lacks release date/platforms but names match exactly', async () => {
+        // Fallout 4 case simulation
+        const igdbResult = createResult('IGDB', 'Fallout 4 - Far Harbor', 'img', '2016-05-19');
+        igdbResult.platforms = ['PC', 'PS4'];
+
+        const ocResult = createResult('OpenCritic', 'Fallout 4: Far Harbor', undefined, undefined); // Missing date
+        ocResult.platforms = []; // Missing platforms
+        ocResult.releaseDate = undefined; // Force undefined to override default param
+
+        const igdbAdapter = new MockAdapter('IGDB', [igdbResult]);
+        const ocAdapter = new MockAdapter('OpenCritic', [ocResult]);
+
+        service = new SearchService([igdbAdapter, ocAdapter]);
+
+        const results = await service.search('Fallout 4');
+
+        // Should be merged into one result
+        expect(results.length).toBe(1);
+        const merged = results[0];
+        expect(merged.sources).toContain('IGDB');
+        expect(merged.sources).toContain('OpenCritic');
+        // Should preserve the date from IGDB
+        expect(merged.releaseDate).toBe('2016-05-19');
+    });
 });
