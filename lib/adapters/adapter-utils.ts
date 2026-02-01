@@ -47,7 +47,9 @@ export function convertRomanNumerals(text: string): string {
  */
 export function normalizeGameName(name: string): string {
     const withArabic = convertRomanNumerals(name);
-    return withArabic.toLowerCase().replace(/[^a-z0-9]/g, "");
+    // Replace & with 'and' before stripping special chars to ensure consistent normalization
+    const withAnd = withArabic.replace(/&/g, "and");
+    return withAnd.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 /**
