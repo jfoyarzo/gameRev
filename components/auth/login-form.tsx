@@ -1,15 +1,12 @@
 
-import { signIn } from "@/auth"
+import { handleSignIn } from "@/app/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export function LoginForm() {
     return (
         <form
-            action={async (formData) => {
-                "use server"
-                await signIn("credentials", formData)
-            }}
+            action={handleSignIn}
             className="flex flex-col gap-4 w-full"
         >
             <div className="grid w-full items-center gap-1.5">
