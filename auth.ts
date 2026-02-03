@@ -2,9 +2,11 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
+import { db } from "@/lib/db";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
+    session: { strategy: "jwt" },
     providers: [
         Credentials({
             async authorize(credentials) {
@@ -15,15 +17,21 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
 
-                    // MOCKED USER FOR TESTING
-                    // In a real app, you would query your database here.
-                    if (email === 'test@example.com' && password === 'password123') {
-                        return {
-                            id: '1',
-                            name: 'Test User',
-                            email: 'test@example.com',
-                        };
-                    }
+                    // MOCKED PASSWORD CHECK (Still no password hashing in DB for this demo)
+                    if (password !== 'password123') return null;
+
+                    const user = await db.query.users.findFirst({
+                        where: (users, { eq }) => eq(users.email, email),
+                    });
+
+                    if (!user) return null;
+
+                    return {
+                        id: user.id,
+                        name: user.username,
+                        email: user.email,
+                        image: user.avatar_url,
+                    };
                 }
 
                 console.log('Invalid credentials');
