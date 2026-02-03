@@ -19,6 +19,9 @@ interface AppConfig {
     opencritic: {
         rapidApiKey: string;
     };
+    database: {
+        url: string;
+    };
 }
 
 function getRequiredEnvVar(name: string): string {
@@ -43,6 +46,9 @@ export const appConfig: AppConfig = {
     },
     opencritic: {
         rapidApiKey: getRequiredEnvVar("OPENCRITIC_API_KEY"),
+    },
+    database: {
+        url: getRequiredEnvVar("DATABASE_URL"),
     },
 };
 
