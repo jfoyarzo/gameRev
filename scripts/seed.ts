@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { users } from "../lib/db/schema";
 import { eq } from "drizzle-orm";
+import { hashPassword } from "../lib/auth/password";
 
 // Load environment variables manually since this runs outside Next.js
 dotenv.config({ path: ".env.local" });
@@ -20,6 +21,10 @@ async function main() {
 
   try {
     const TEST_USER_EMAIL = "test@example.com";
+    const TEST_USER_PASSWORD = "password123";
+
+    // Hash the password
+    const hashedPassword = await hashPassword(TEST_USER_PASSWORD);
 
     // Check if user exists
     const existingUser = await db.query.users.findFirst({
@@ -33,6 +38,7 @@ async function main() {
           username: "TestUser",
           avatar_url: "https://github.com/shadcn.png",
           emailVerified: new Date(),
+          password_hash: hashedPassword,
         })
         .where(eq(users.email, TEST_USER_EMAIL));
     } else {
@@ -42,6 +48,7 @@ async function main() {
         email: TEST_USER_EMAIL,
         avatar_url: "https://github.com/shadcn.png",
         emailVerified: new Date(),
+        password_hash: hashedPassword,
       });
     }
 
