@@ -3,6 +3,7 @@ import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import { db } from "@/lib/db";
+import { verifyPassword } from '@/lib/auth/password';
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
@@ -17,14 +18,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
 
-                    // MOCKED PASSWORD CHECK (Still no password hashing in DB for this demo)
-                    if (password !== 'password123') return null;
-
                     const user = await db.query.users.findFirst({
                         where: (users, { eq }) => eq(users.email, email),
                     });
 
-                    if (!user) return null;
+                    if (!user || !user.password_hash) return null;
+
+                    const isValidPassword = await verifyPassword(password, user.password_hash);
+
+                    if (!isValidPassword) return null;
 
                     return {
                         id: user.id,
