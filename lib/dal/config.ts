@@ -19,6 +19,10 @@ interface AppConfig {
     opencritic: {
         rapidApiKey: string;
     };
+    recaptcha: {
+        siteKey: string;
+        secretKey: string;
+    };
     database: {
         url: string;
     };
@@ -46,6 +50,10 @@ export const appConfig: AppConfig = {
     },
     opencritic: {
         rapidApiKey: getRequiredEnvVar("OPENCRITIC_API_KEY"),
+    },
+    recaptcha: {
+        siteKey: getRequiredEnvVar("NEXT_PUBLIC_RECAPTCHA_SITE_KEY"),
+        secretKey: getRequiredEnvVar("RECAPTCHA_SECRET_KEY"),
     },
     database: {
         url: getRequiredEnvVar("DATABASE_URL"),
