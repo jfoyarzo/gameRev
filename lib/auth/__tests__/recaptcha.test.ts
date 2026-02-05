@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { verifyRecaptcha } from '../recaptcha';
 
 // Mock the config
@@ -16,8 +16,15 @@ global.fetch = fetchMock;
 
 describe('reCAPTCHA Verification', () => {
     beforeEach(() => {
+        // Set to production so we actually test the verification logic
+        vi.stubEnv('NODE_ENV', 'production');
+
         vi.clearAllMocks();
         fetchMock.mockReset();
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     it('should successfully verify token with good score', async () => {

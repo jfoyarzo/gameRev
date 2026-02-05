@@ -15,6 +15,11 @@ const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 const RECAPTCHA_SCORE_THRESHOLD = 0.5;
 
 export async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number; error?: string }> {
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('reCAPTCHA verification bypassed (non-production environment)');
+        return { success: true, score: 1.0 };
+    }
+
     const secretKey = appConfig.recaptcha.secretKey;
 
     try {
@@ -52,3 +57,4 @@ export async function verifyRecaptcha(token: string): Promise<{ success: boolean
         return { success: false, error: 'Failed to verify reCAPTCHA' };
     }
 }
+
