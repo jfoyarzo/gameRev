@@ -116,6 +116,7 @@ jobs:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
           NEXT_PUBLIC_RECAPTCHA_SITE_KEY: test_recaptcha_site_key
           RECAPTCHA_SECRET_KEY: test_recaptcha_secret_key
+          AUTH_SECRET: test_auth_secret_for_ci_e2e_tests_only
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
