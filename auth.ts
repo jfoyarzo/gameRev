@@ -1,9 +1,9 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
-import { z } from 'zod';
 import { db } from "@/lib/db";
 import { verifyPassword } from '@/lib/auth/password';
+import { signInSchema } from '@/lib/auth/validation';
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
@@ -11,9 +11,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     providers: [
         Credentials({
             async authorize(credentials) {
-                const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
-                    .safeParse(credentials);
+                const parsedCredentials = signInSchema.safeParse(credentials);
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
