@@ -7,6 +7,7 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { hashPassword } from '@/lib/auth/password';
 import { signInSchema, signUpSchema, getFirstValidationError } from '@/lib/auth/validation';
+import { verifyRecaptcha } from '@/lib/auth/recaptcha';
 
 export async function handleSignIn(formData: FormData) {
     const email = formData.get('email') as string;
@@ -39,6 +40,16 @@ export async function handleSignUp(formData: FormData) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
+    const recaptchaToken = formData.get('recaptchaToken') as string;
+
+    if (!recaptchaToken) {
+        throw new Error('reCAPTCHA verification is required');
+    }
+
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+    if (!recaptchaResult.success) {
+        throw new Error(recaptchaResult.error || 'reCAPTCHA verification failed');
+    }
 
     const validationResult = signUpSchema.safeParse({
         username,
