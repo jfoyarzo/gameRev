@@ -5,9 +5,19 @@ import { db } from "@/lib/db";
 import { verifyPassword } from '@/lib/auth/password';
 import { signInSchema } from '@/lib/auth/validation';
 
+/** Maximum session duration in seconds (4 hours) - OWASP recommended */
+const SESSION_MAX_AGE_SECONDS = 4 * 60 * 60;
+
+/** Session refresh interval in seconds (30 minutes) - updates active sessions */
+const SESSION_UPDATE_AGE_SECONDS = 30 * 60;
+
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
-    session: { strategy: "jwt" },
+    session: {
+        strategy: "jwt",
+        maxAge: SESSION_MAX_AGE_SECONDS,
+        updateAge: SESSION_UPDATE_AGE_SECONDS,
+    },
     providers: [
         Credentials({
             async authorize(credentials) {
