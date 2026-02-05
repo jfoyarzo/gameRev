@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * E2E tests for authentication flows
@@ -174,12 +174,12 @@ test.describe('Authentication Flow', () => {
             }
 
             // Store credentials for this test
-            page.context().storageState;
-            (page as any).testCredentials = uniqueUser;
+            (page as Page & { testCredentials?: typeof uniqueUser }).testCredentials = uniqueUser;
         });
 
         test('should successfully sign in with valid credentials', async ({ page }) => {
-            const credentials = (page as any).testCredentials;
+            const credentials = (page as Page & { testCredentials?: { username: string; email: string; password: string } }).testCredentials;
+            if (!credentials) throw new Error('Test credentials not set');
 
             await page.goto('/login');
             await expect(page).toHaveURL(/\/login/);
@@ -215,7 +215,8 @@ test.describe('Authentication Flow', () => {
         });
 
         test('should redirect away from login when already authenticated', async ({ page }) => {
-            const credentials = (page as any).testCredentials;
+            const credentials = (page as Page & { testCredentials?: { username: string; email: string; password: string } }).testCredentials;
+            if (!credentials) throw new Error('Test credentials not set');
 
             // First sign in
             await page.goto('/login');
