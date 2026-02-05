@@ -5,11 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useActionState } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export function SignupForm() {
+    const { executeRecaptcha } = useGoogleReCaptcha();
+
     const [error, formAction, isPending] = useActionState<string | null, FormData>(
         async (_prevState, formData) => {
             try {
+                if (!executeRecaptcha) {
+                    return 'reCAPTCHA is not ready. Please try again.';
+                }
+
+                const token = await executeRecaptcha('signup');
+                formData.append('recaptchaToken', token);
+
                 await handleSignUp(formData);
                 return null;
             } catch (err) {
