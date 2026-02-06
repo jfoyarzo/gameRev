@@ -4,7 +4,7 @@ export default defineConfig({
     testDir: './test/e2e',
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 2 : 0,
+    retries: 0, // No retries - fail fast to surface real issues
     workers: process.env.CI ? 1 : undefined,
     reporter: 'html',
     use: {
@@ -36,5 +36,10 @@ export default defineConfig({
         command: 'npm run dev',
         url: 'http://localhost:3000',
         reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000, // 2 minutes max to start server
+        stderr: 'pipe', // Show server errors
+        env: Object.fromEntries(
+            Object.entries(process.env).filter(([_, v]) => v !== undefined)
+        ) as Record<string, string>,
     },
 });
