@@ -42,13 +42,16 @@ export async function handleSignUp(formData: FormData) {
     const confirmPassword = formData.get('confirmPassword') as string;
     const recaptchaToken = formData.get('recaptchaToken') as string;
 
-    if (!recaptchaToken) {
-        throw new Error('reCAPTCHA verification is required');
-    }
+    // Only verify reCAPTCHA in production
+    if (process.env.NODE_ENV === 'production') {
+        if (!recaptchaToken || recaptchaToken === 'bypass') {
+            throw new Error('reCAPTCHA verification is required');
+        }
 
-    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-    if (!recaptchaResult.success) {
-        throw new Error(recaptchaResult.error || 'reCAPTCHA verification failed');
+        const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+        if (!recaptchaResult.success) {
+            throw new Error(recaptchaResult.error || 'reCAPTCHA verification failed');
+        }
     }
 
     const validationResult = signUpSchema.safeParse({
