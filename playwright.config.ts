@@ -56,7 +56,8 @@ export default defineConfig({
                 IGDB_BASE_URL: 'http://localhost:4000/v4',
                 RAWG_BASE_URL: 'http://localhost:4000/api',
                 OPENCRITIC_BASE_URL: 'http://localhost:4000',
-                TWITCH_ID_URL: 'http://localhost:4000', // Assuming client uses this base if configurable, or we need to update igdb-client to support full URL override for token
+                TWITCH_ID_URL: 'http://localhost:4000',
+                NEXT_PUBLIC_API_MOCKING: 'enabled',
             },
         }
     ],

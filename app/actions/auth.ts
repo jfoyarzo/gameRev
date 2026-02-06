@@ -46,8 +46,9 @@ export async function handleSignUp(formData: FormData) {
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
     const recaptchaToken = formData.get('recaptchaToken') as string;
+    const isE2EMocking = process.env.NEXT_PUBLIC_API_MOCKING === 'enabled';
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && !isE2EMocking) {
         if (!recaptchaToken || recaptchaToken === 'bypass') {
             throw new Error('reCAPTCHA verification is required');
         }
