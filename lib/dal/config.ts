@@ -40,16 +40,25 @@ function getRequiredEnvVar(name: string): string {
     return value;
 }
 
-export const appConfig: AppConfig = {
+export const appConfig: AppConfig & {
+    igdb: { baseUrl: string };
+    rawg: { baseUrl: string };
+    opencritic: { baseUrl: string };
+} = {
     twitch: {
         clientId: getRequiredEnvVar("TWITCH_CLIENT_ID"),
         clientSecret: getRequiredEnvVar("TWITCH_CLIENT_SECRET"),
     },
+    igdb: {
+        baseUrl: process.env.IGDB_BASE_URL || "https://api.igdb.com/v4",
+    },
     rawg: {
         apiKey: getRequiredEnvVar("RAWG_API_KEY"),
+        baseUrl: process.env.RAWG_BASE_URL || "https://api.rawg.io/api",
     },
     opencritic: {
         rapidApiKey: getRequiredEnvVar("OPENCRITIC_API_KEY"),
+        baseUrl: process.env.OPENCRITIC_BASE_URL || "https://opencritic-api.p.rapidapi.com",
     },
     recaptcha: {
         siteKey: getRequiredEnvVar("NEXT_PUBLIC_RECAPTCHA_SITE_KEY"),

@@ -10,7 +10,7 @@ export async function fetchRAWG<T>(endpoint: string, params: Record<string, stri
         key: RAWG_API_KEY,
     });
 
-    const response = await fetch(`https://api.rawg.io/api${endpoint}?${queryParams.toString()}`, {
+    const response = await fetch(`${appConfig.rawg.baseUrl}${endpoint}?${queryParams.toString()}`, {
         method: "GET",
         headers: {
             "Accept": "application/json",
