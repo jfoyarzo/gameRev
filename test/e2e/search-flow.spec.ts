@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test('search flow', async ({ page }) => {
+    // Note: API calls are mocked server-side via E2E_TEST environment variable
+    // No need for browser-level mocking as Next.js Server Components make API calls on the server
+
     // 1. Visit Homepage
     await page.goto('/');
     await expect(page).toHaveTitle(/GameRev/i);
@@ -12,11 +15,11 @@ test('search flow', async ({ page }) => {
 
     // 3. Verify Search Results Page
     await expect(page).toHaveURL(/\/search\?q=Hades/);
-    await expect(page.getByText('Hades 2', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('Hades II', { exact: false }).first()).toBeVisible();
 
     // 4. Navigate to Details
     // Click the first game card that contains "Hades"
-    await page.getByText('Hades 2', { exact: false }).first().click();
+    await page.getByText('Hades II', { exact: false }).first().click();
 
     // 5. Verify Details Page
     // URL should contain game ID or slug

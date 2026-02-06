@@ -1,41 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test('game details flow', async ({ page }) => {
-    // Mock OpenCritic API to avoid hitting rate limits and needing real creds in E2E
-    await page.route('**/opencritic-api.p.rapidapi.com/**', async route => {
-        const url = route.request().url();
-
-        if (url.includes('/game/search')) {
-            await route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify([{
-                    id: 123,
-                    name: 'The Witcher 3: Wild Hunt',
-                    dist: 0.1
-                }])
-            });
-        } else if (url.includes('/game/123')) {
-            await route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    id: 123,
-                    name: 'The Witcher 3: Wild Hunt',
-                    description: 'The Witcher 3: Wild Hunt is a 2015 action role-playing game developed and published by CD Projekt.',
-                    firstReleaseDate: '2015-05-19T00:00:00.000Z',
-                    topCriticScore: 92,
-                    tier: 'Mighty',
-                    images: {
-                        box: { og: 'https://example.com/witcher3-box.jpg' },
-                        banner: { og: 'https://example.com/witcher3-banner.jpg' }
-                    }
-                })
-            });
-        } else {
-            await route.continue();
-        }
-    });
+    // Note: API calls are mocked server-side via E2E_TEST environment variable
+    // No need for browser-level mocking as Next.js Server Components make API calls on the server
 
     // 1. Navigate to home
     await page.goto('/');
@@ -69,3 +36,4 @@ test('game details flow', async ({ page }) => {
     const images = page.locator('img');
     expect(await images.count()).toBeGreaterThan(0);
 });
+
