@@ -181,10 +181,9 @@ test.describe('Authentication Flow', () => {
             await page.goto('/login');
 
             // Should be redirected away from login (middleware check)
-            await page.waitForLoadState('networkidle');
-            // Either stays at home or immediately redirects
-            const currentUrl = page.url();
-            expect(currentUrl === '/' || !currentUrl.includes('/login')).toBeTruthy();
+            // Wait for the redirect to happen
+            await expect(page).not.toHaveURL(/\/login/);
+            await expect(page).toHaveURL('/');
         });
     });
 
