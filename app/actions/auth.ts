@@ -28,7 +28,12 @@ export async function handleSignIn(formData: FormData) {
         });
     } catch (error) {
         if (error instanceof AuthError) {
-            throw error;
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    throw new Error('Invalid email or password');
+                default:
+                    throw new Error('An error occurred during sign in');
+            }
         }
         throw error;
     }
@@ -42,7 +47,6 @@ export async function handleSignUp(formData: FormData) {
     const confirmPassword = formData.get('confirmPassword') as string;
     const recaptchaToken = formData.get('recaptchaToken') as string;
 
-    // Only verify reCAPTCHA in production
     if (process.env.NODE_ENV === 'production') {
         if (!recaptchaToken || recaptchaToken === 'bypass') {
             throw new Error('reCAPTCHA verification is required');
