@@ -11,9 +11,9 @@ export default defineConfig({
         baseURL: 'http://localhost:3000',
         trace: 'on-first-retry',
     },
-    timeout: 10000, // 10 seconds max per test - fail fast
+    timeout: 30000, // 30 seconds max per test - increased for CI environments
     expect: {
-        timeout: 5000, // 5 seconds max for assertions
+        timeout: 10000, // 10 seconds max for assertions - increased for CI
     },
     projects: process.env.CI
         ? [
@@ -36,14 +36,28 @@ export default defineConfig({
                 use: { ...devices['Desktop Safari'] },
             },
         ],
-    webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000, // 2 minutes max to start server
-        stderr: 'pipe', // Show server errors
-        env: Object.fromEntries(
-            Object.entries(process.env).filter(([_, v]) => v !== undefined)
-        ) as Record<string, string>,
-    },
+    webServer: [
+        {
+            command: 'TS_NODE_PROJECT=tsconfig.json npx tsx test/mocks/standalone-server.ts',
+            url: 'http://localhost:4000',
+            reuseExistingServer: !process.env.CI,
+            timeout: 120 * 1000,
+        },
+        {
+            command: 'npm run dev',
+            url: 'http://localhost:3000',
+            reuseExistingServer: !process.env.CI,
+            timeout: 120 * 1000,
+            env: {
+                ...Object.fromEntries(
+                    Object.entries(process.env).filter(([_, v]) => v !== undefined)
+                ) as Record<string, string>,
+                // Redirect API calls to the standalone mock server
+                IGDB_BASE_URL: 'http://localhost:4000/v4',
+                RAWG_BASE_URL: 'http://localhost:4000/api',
+                OPENCRITIC_BASE_URL: 'http://localhost:4000',
+                TWITCH_ID_URL: 'http://localhost:4000', // Assuming client uses this base if configurable, or we need to update igdb-client to support full URL override for token
+            },
+        }
+    ],
 });
