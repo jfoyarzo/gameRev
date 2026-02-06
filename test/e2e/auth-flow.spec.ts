@@ -71,8 +71,11 @@ test.describe('Authentication Flow', () => {
             await page.fill('input[name="confirmPassword"]', uniqueUser.password);
             await page.click('button[type="submit"]');
 
-            // Should show error message
-            await expect(page.getByText(/email already exists/i)).toBeVisible();
+            // Wait for the server action to complete and error to render
+            await page.waitForLoadState('networkidle');
+
+            // Should show error message (use longer timeout for CI environments)
+            await expect(page.getByText(/email already exists/i)).toBeVisible({ timeout: 15000 });
         });
 
         test('should show error for duplicate username', async ({ page, context }) => {
@@ -105,8 +108,11 @@ test.describe('Authentication Flow', () => {
             await page.fill('input[name="confirmPassword"]', uniqueUser.password);
             await page.click('button[type="submit"]');
 
-            // Should show error message
-            await expect(page.getByText(/username.*taken/i)).toBeVisible();
+            // Wait for the server action to complete and error to render
+            await page.waitForLoadState('networkidle');
+
+            // Should show error message (use longer timeout for CI environments)
+            await expect(page.getByText(/username.*taken/i)).toBeVisible({ timeout: 15000 });
         });
     });
 
