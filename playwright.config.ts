@@ -11,6 +11,10 @@ export default defineConfig({
         baseURL: 'http://localhost:3000',
         trace: 'on-first-retry',
     },
+    timeout: 10000, // 10 seconds max per test - fail fast
+    expect: {
+        timeout: 5000, // 5 seconds max for assertions
+    },
     projects: process.env.CI
         ? [
             {
