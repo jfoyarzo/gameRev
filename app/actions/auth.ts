@@ -88,11 +88,26 @@ export async function handleSignUp(formData: FormData) {
 
     const passwordHash = await hashPassword(password);
 
-    await db.insert(users).values({
-        username,
-        email,
-        password_hash: passwordHash,
-    });
+    try {
+        await db.insert(users).values({
+            username,
+            email,
+            password_hash: passwordHash,
+        });
+    } catch (error) {
+        // Define Postgres error shape
+        const pgError = error as { code?: string; constraint_name?: string; detail?: string };
+
+        if (pgError.code === '23505') {
+            if (pgError.constraint_name?.includes('email') || pgError.detail?.includes('email')) {
+                throw new Error('An account with this email already exists');
+            }
+            if (pgError.constraint_name?.includes('username') || pgError.detail?.includes('username')) {
+                throw new Error('This username is already taken');
+            }
+        }
+        throw new Error('An error occurred during account creation');
+    }
 
     try {
         await signIn('credentials', {
