@@ -13,13 +13,19 @@ export function SignupForm() {
     const [error, formAction, isPending] = useActionState<string | null, FormData>(
         async (_prevState, formData) => {
             try {
-                // In non-production environments, reCAPTCHA might not be available
-                // This allows tests and local development to work without reCAPTCHA
-                if (executeRecaptcha) {
+                // Skip reCAPTCHA entirely in E2E test mode (mocking enabled)
+                // The test key is invalid and executeRecaptcha will throw
+                const isE2EMocking = process.env.NEXT_PUBLIC_API_MOCKING === 'enabled';
+
+                if (isE2EMocking) {
+                    // Bypass reCAPTCHA for E2E tests
+                    formData.append('recaptchaToken', 'bypass');
+                } else if (executeRecaptcha) {
+                    // Production/development: execute reCAPTCHA normally
                     const token = await executeRecaptcha('signup');
                     formData.append('recaptchaToken', token);
                 } else {
-                    // No reCAPTCHA in non-production - server will handle bypass
+                    // No reCAPTCHA available - server will handle bypass in dev
                     formData.append('recaptchaToken', 'bypass');
                 }
 
