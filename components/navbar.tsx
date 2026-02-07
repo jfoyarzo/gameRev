@@ -2,8 +2,12 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { Gamepad2, Search } from "lucide-react";
 import { SearchInput } from "./search-input";
+import { verifySession } from "@/lib/auth";
+import { SignOut } from "@/components/auth/sign-out-button";
 
-export function Navbar() {
+export async function Navbar() {
+    const session = await verifySession();
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
             <div className="container mx-auto flex h-16 items-center px-4">
@@ -34,12 +38,23 @@ export function Navbar() {
 
                     {/* Auth Actions */}
                     <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" asChild>
-                            <Link href="/login">Log in</Link>
-                        </Button>
-                        <Button size="sm" asChild>
-                            <Link href="/signup">Sign up</Link>
-                        </Button>
+                        {session?.user ? (
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium hidden md:inline-block">
+                                    {session.user.name || session.user.email}
+                                </span>
+                                <SignOut />
+                            </div>
+                        ) : (
+                            <>
+                                <Button variant="ghost" size="sm" asChild>
+                                    <Link href="/login">Log in</Link>
+                                </Button>
+                                <Button size="sm" asChild>
+                                    <Link href="/signup">Sign up</Link>
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

@@ -25,7 +25,7 @@ export const getAccessToken = cache(async () => {
 export async function fetchIGDB<T>(endpoint: string, query: string): Promise<T> {
     const token = await getAccessToken();
 
-    const response = await fetch(`https://api.igdb.com/v4${endpoint}`, {
+    const response = await fetch(`${appConfig.igdb.baseUrl}${endpoint}`, {
         method: "POST",
         headers: {
             "Client-ID": TWITCH_CLIENT_ID,

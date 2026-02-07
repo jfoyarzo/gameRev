@@ -11,9 +11,11 @@ import {
     NAME_SEARCH_LIMIT,
     POPULAR_GAMES_LIMIT,
     NEW_GAMES_LIMIT,
-    RATING_NORMALIZED_SCALE,
-    RATING_RAWG_SCALE
+    RATING_NORMALIZED_SCALE
 } from "@/lib/constants";
+
+/** Maximum rating on RAWG's 0-5 scale */
+const RATING_RAWG_SCALE = 5;
 
 export class RawgAdapter extends BaseAdapter {
     name = "RAWG";

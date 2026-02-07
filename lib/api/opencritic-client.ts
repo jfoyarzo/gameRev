@@ -11,7 +11,7 @@ import {
 const OPENCRITIC_RAPIDAPI_HOST = 'opencritic-api.p.rapidapi.com';
 
 const openCriticClient = createAPIClient({
-    baseUrl: `https://${OPENCRITIC_RAPIDAPI_HOST}`,
+    baseUrl: appConfig.opencritic.baseUrl,
     defaultHeaders: {
         'Accept': 'application/json',
         'X-RapidAPI-Host': OPENCRITIC_RAPIDAPI_HOST,

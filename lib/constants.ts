@@ -34,12 +34,6 @@ export const RATING_EXCELLENT_THRESHOLD = 90;
 /** Rating score threshold for "good" rating (yellow color) */
 export const RATING_GOOD_THRESHOLD = 75;
 
-/** Maximum possible rating score on normalized scale */
-export const RATING_MAX_SCORE = 100;
-
-/** Maximum rating on RAWG's 0-5 scale */
-export const RATING_RAWG_SCALE = 5;
-
 /** Target scale for normalized ratings (0-100) */
 export const RATING_NORMALIZED_SCALE = 100;
 
