@@ -93,9 +93,9 @@ Every push and main branch pull request undergoes rigorous checks:
    IGDB_CLIENT_SECRET=your_client_secret
    RAWG_API_KEY=your_api_key
    OPENCRITIC_API_KEY=your_api_key
-   # Register localhost at https://www.google.com/recaptcha/admin (reCAPTCHA v3)
-   RECAPTCHA_SITE_KEY=your_recaptcha_v3_site_key
-   RECAPTCHA_SECRET_KEY=your_recaptcha_v3_secret_key
+   # reCAPTCHA v3 (Optional for Development)
+   # NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_recaptcha_v3_site_key
+   # RECAPTCHA_SECRET_KEY=your_recaptcha_v3_secret_key
    ```
 
 5. **Run database migrations**

@@ -76,7 +76,7 @@ GameRev uses **NextAuth.js v5** (Auth.js) with a credentials-based authenticatio
 
 **Strategy**: Database sessions
 
-**Configuration** ([auth.ts](file:///Users/felipe/workspace/gaming-reviews-app/auth.ts)):
+**Configuration** (`auth.ts`):
 ```typescript
 session: {
   strategy: "database",
@@ -94,30 +94,31 @@ session: {
 
 **Implementation**: Invisible reCAPTCHA v3 on signup form
 
-**Client-Side** ([signup-form.tsx](file:///Users/felipe/workspace/gaming-reviews-app/components/auth/signup-form.tsx)):
+**Client-Side** (`components/auth/signup-form.tsx`):
 ```typescript
 const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'signup' });
 ```
 
-**Server-Side Verification** ([recaptcha.ts](file:///Users/felipe/workspace/gaming-reviews-app/lib/auth/recaptcha.ts)):
-- Verifies token with Google API
+**Server-Side Verification** (`lib/auth/recaptcha.ts`):
+- Verifies token with Google API (Production only)
+- **Development**: Verification is bypassed (always returns success) to simplify setup
 - Requires score ≥ 0.5 (configurable threshold)
-- Returns detailed response with score and action
 
 **Environment Configuration**:
 ```env
-RECAPTCHA_SITE_KEY=your_site_key
+# Optional for Development (defaults to dummy keys)
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
 RECAPTCHA_SECRET_KEY=your_secret_key
 ```
 
 > [!NOTE]
-> reCAPTCHA v3 does not have universal test keys. You must register your `localhost` domain at the [reCAPTCHA admin console](https://www.google.com/recaptcha/admin) or use mocked verification in tests (see test setup in `vitest.setup.ts`).
+> For local development, you can skip this setup as the validation is bypassed.
 
 ---
 
 ## Database Schema
 
-**Users Table** ([schema.ts](file:///Users/felipe/workspace/gaming-reviews-app/lib/db/schema.ts)):
+**Users Table** (`lib/db/schema.ts`):
 ```typescript
 export const users = pgTable("user", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -135,7 +136,7 @@ export const users = pgTable("user", {
 
 ## Validation
 
-**Shared Schemas** ([validation.ts](file:///Users/felipe/workspace/gaming-reviews-app/lib/auth/validation.ts)):
+**Shared Schemas** (`lib/auth/validation.ts`):
 
 ```typescript
 export const signUpSchema = z.object({
@@ -176,12 +177,12 @@ export const signInSchema = z.object({
 
 ## Testing
 
-**Unit Tests** ([auth.test.ts](file:///Users/felipe/workspace/gaming-reviews-app/test/auth.test.ts)):
+**Unit Tests** (`test/auth.test.ts`):
 - Validation schema tests
 - Password hashing verification
 - reCAPTCHA token verification
 
-**E2E Tests** ([auth.spec.ts](file:///Users/felipe/workspace/gaming-reviews-app/test/e2e/auth.spec.ts)):
+**E2E Tests** (`test/e2e/auth.spec.ts`):
 - Complete signup flow
 - Complete signin flow
 - Session persistence
@@ -204,19 +205,9 @@ export const signInSchema = z.object({
 - Verify user exists in database
 - Check NextAuth configuration matches credential provider
 
-**reCAPTCHA verification fails**
-- Ensure `RECAPTCHA_SECRET_KEY` is set correctly
-- Check network connectivity to Google API
-- Verify site key matches domain (localhost requires special setup)
-
-**Session not persisting**
-- Confirm database session table exists
-- Check cookie settings (`secure: true` requires HTTPS)
-- Verify `maxAge` and `updateAge` settings
-
 **Middleware errors (Next.js 16)**
 - NextAuth 5 + Next.js 16 compatibility: Use `proxy.ts` pattern
-- See [proxy.ts](file:///Users/felipe/workspace/gaming-reviews-app/proxy.ts) for implementation
+- See `proxy.ts` for implementation
 
 ---
 

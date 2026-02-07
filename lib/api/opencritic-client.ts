@@ -1,6 +1,7 @@
 import 'server-only';
 import { createAPIClient } from './base-client';
 import { appConfig } from '@/lib/dal/config';
+import { CACHE_TAG_GAMES } from '@/lib/constants';
 import {
     OpenCriticGame,
     OpenCriticSearchResult,
@@ -27,6 +28,7 @@ export async function searchOpenCritic(query: string): Promise<OpenCriticSearchR
     return openCriticClient<OpenCriticSearchResult[]>({
         endpoint: '/game/search',
         params: { criteria: query },
+        tags: [CACHE_TAG_GAMES],
     });
 }
 
@@ -37,6 +39,7 @@ export async function searchOpenCritic(query: string): Promise<OpenCriticSearchR
 export async function getOpenCriticGame(gameId: number): Promise<OpenCriticGame> {
     return openCriticClient<OpenCriticGame>({
         endpoint: `/game/${gameId}`,
+        tags: [CACHE_TAG_GAMES],
     });
 }
 
@@ -47,6 +50,7 @@ export async function getOpenCriticGame(gameId: number): Promise<OpenCriticGame>
 export async function getOpenCriticPopularGames(): Promise<OpenCriticGameListItem[]> {
     return openCriticClient<OpenCriticGameListItem[]>({
         endpoint: '/game/popular',
+        tags: [CACHE_TAG_GAMES],
     });
 }
 
@@ -57,5 +61,6 @@ export async function getOpenCriticPopularGames(): Promise<OpenCriticGameListIte
 export async function getOpenCriticRecentlyReleased(): Promise<OpenCriticGameListItem[]> {
     return openCriticClient<OpenCriticGameListItem[]>({
         endpoint: '/game/recently-released',
+        tags: [CACHE_TAG_GAMES],
     });
 }

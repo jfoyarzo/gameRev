@@ -40,16 +40,25 @@ Contains the core business logic, decoupled from the API layer.
     - **Preloading**: Implements a "warm the cache" pattern to prevent waterfalls in server components.
     - **Merge Logic**: Intelligent merging of data fields (Covers, Descriptions, Release Dates) handling conflicts based on source priority.
 
-#### 3. Data Access Layer (DAL) (`/lib/dal`, `/lib/adapters`)
+#### 3. Data Access Layer (DAL) (`/lib/dal`, `/lib/adapters`, `/lib/api`)
 Handles all external data interactions.
-- **Server-Only Isolation**: Enforced boundary to prevent API keys from leaking to the client (`import 'server-only'`).
-- **Adapter Registry**: Centralized configuration (`registry.ts`) manages active adapters and their priorities.
-- **Standard Interface**: All adapters must implement `GameAdapter`:
+
+- **SDK Client Pattern (`/lib/api`)**:
+    - **Purpose**: Encapsulates raw API logic, validation, and request construction.
+    - **Implements**: Named, typed methods (e.g., `searchIGDBGames`, `getRAWGGameDetails`).
+    - **Caching**: Uses Next.js `fetch` cache tags (`TAG_GAMES`) and revalidation strategies.
+
+- **Adapter Pattern (`/lib/adapters`)**:
+    - **Purpose**: Normalization and standard interface implementation.
+    - **Usage**: Only interacts with SDK Clients, never raw `fetch`.
+    - **Standard Interface**: All adapters must implement `GameAdapter`:
     ```typescript
     interface GameAdapter {
+        name: string;
+        search(query: string): Promise<SearchResult[]>;
         getGameDetails(...): Promise<GameSourceInfo | null>;
-        getPopularGames(...): Promise<SearchResult[]>;
-        searchGames(...): Promise<SearchResult[]>;
+        getPopularGames(limit?: number): Promise<SearchResult[]>;
+        getNewGames(limit?: number): Promise<SearchResult[]>;
     }
     ```
 
@@ -58,7 +67,7 @@ Handles all external data interactions.
 2. **Page Load**: `page.tsx` calls `GameService.getGame()`.
 3. **Aggregation**:
     - `GameService` queries the **Registry** for enabled adapters.
-    - Parallel requests are sent to IGDB, RAWG, etc., via their specific **Adapters**.
+    - Parallel requests are sent via **Adapters**, which call their respective **SDK Clients**.
 4. **Unification**: Responses are normalized and merged into a `UnifiedGameData` object.
 5. **Render**: The unified object is passed to the UI for rendering, with source attribution preserved.
 

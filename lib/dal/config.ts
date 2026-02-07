@@ -61,8 +61,8 @@ export const appConfig: AppConfig & {
         baseUrl: process.env.OPENCRITIC_BASE_URL || "https://opencritic-api.p.rapidapi.com",
     },
     recaptcha: {
-        siteKey: getRequiredEnvVar("NEXT_PUBLIC_RECAPTCHA_SITE_KEY"),
-        secretKey: getRequiredEnvVar("RECAPTCHA_SECRET_KEY"),
+        siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "development-dummy-key",
+        secretKey: process.env.RECAPTCHA_SECRET_KEY || "development-dummy-key",
     },
     database: {
         url: getRequiredEnvVar("DATABASE_URL"),
