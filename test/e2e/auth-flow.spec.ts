@@ -71,11 +71,12 @@ test.describe('Authentication Flow', () => {
             await page.fill('input[name="confirmPassword"]', uniqueUser.password);
             await page.click('button[type="submit"]');
 
-            // Wait for the server action to complete and error to render
-            await page.waitForLoadState('networkidle');
+            // Wait for the error element to appear using stable test ID
+            const errorElement = page.getByTestId('signup-error');
+            await expect(errorElement).toBeVisible({ timeout: 15000 });
 
-            // Should show error message (use longer timeout for CI environments)
-            await expect(page.getByText(/email already exists/i)).toBeVisible({ timeout: 15000 });
+            // Verify it contains the expected error message
+            await expect(errorElement).toContainText(/email already exists/i);
         });
 
         test('should show error for duplicate username', async ({ page, context }) => {
@@ -108,11 +109,12 @@ test.describe('Authentication Flow', () => {
             await page.fill('input[name="confirmPassword"]', uniqueUser.password);
             await page.click('button[type="submit"]');
 
-            // Wait for the server action to complete and error to render
-            await page.waitForLoadState('networkidle');
+            // Wait for the error element to appear using stable test ID
+            const errorElement = page.getByTestId('signup-error');
+            await expect(errorElement).toBeVisible({ timeout: 15000 });
 
-            // Should show error message (use longer timeout for CI environments)
-            await expect(page.getByText(/username.*taken/i)).toBeVisible({ timeout: 15000 });
+            // Verify it contains the expected error message
+            await expect(errorElement).toContainText(/username.*taken/i);
         });
     });
 

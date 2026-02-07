@@ -54,7 +54,10 @@ export function SignupForm() {
                 <Input type="password" name="confirmPassword" id="confirmPassword" placeholder="password123" required minLength={6} />
             </div>
             {error && (
-                <div className="text-sm text-red-500 bg-red-50 dark:bg-red-950/20 p-3 rounded-md border border-red-200 dark:border-red-900">
+                <div
+                    data-testid="signup-error"
+                    className="text-sm text-red-500 bg-red-50 dark:bg-red-950/20 p-3 rounded-md border border-red-200 dark:border-red-900"
+                >
                     {error}
                 </div>
             )}
