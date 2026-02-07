@@ -110,18 +110,11 @@ export async function handleSignUp(formData: FormData) {
         throw new Error('An error occurred during account creation');
     }
 
-    try {
-        await signIn('credentials', {
-            email,
-            password,
-            redirect: false,
-        });
-    } catch (error) {
-        if (error instanceof AuthError) {
-            throw error;
-        }
-        throw error;
-    }
+    await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+    });
 
     redirect('/');
 }
