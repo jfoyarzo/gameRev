@@ -5,9 +5,11 @@
 import {
     DAYS_IN_MONTH,
     ONE_DAY_MS,
-    ONE_SECOND_MS,
-    RATING_NORMALIZED_SCALE
+    ONE_SECOND_MS
 } from "@/lib/constants";
+
+/** Target scale for normalized ratings (0-100) */
+const RATING_NORMALIZED_SCALE = 100;
 
 /**
  * Roman numeral to Arabic number mapping (common game sequel numbers)

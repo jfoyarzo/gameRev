@@ -7,8 +7,10 @@ import { ArrowRight, Flame, Sparkles } from "lucide-react";
 export const revalidate = 3600; // Cache revalidation time in seconds (1 hour)
 
 export default async function Home() {
-  const popularGames = await gameService.getPopularGames(8);
-  const newGames = await gameService.getNewGames(4);
+  const [popularGames, newGames] = await Promise.all([
+    gameService.getPopularGames(8),
+    gameService.getNewGames(4),
+  ]);
 
   return (
     <div className="min-h-screen bg-background pb-20">

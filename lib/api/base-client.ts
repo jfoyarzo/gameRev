@@ -14,6 +14,7 @@ export interface RequestOptions {
     body?: string;
     params?: Record<string, string>;
     headers?: Record<string, string>;
+    tags?: string[];
 }
 
 /**
@@ -29,7 +30,7 @@ export function createAPIClient(config: APIClientConfig) {
     } = config;
 
     return async function fetchAPI<T>(options: RequestOptions): Promise<T> {
-        const { endpoint, method = 'GET', body, params, headers } = options;
+        const { endpoint, method = 'GET', body, params, headers, tags } = options;
         const prepared = await prepareRequest();
 
         let url = `${baseUrl}${endpoint}`;
@@ -46,7 +47,10 @@ export function createAPIClient(config: APIClientConfig) {
                 ...headers
             },
             body,
-            next: { revalidate: revalidateSeconds }
+            next: {
+                revalidate: revalidateSeconds,
+                tags
+            }
         });
 
         if (!response.ok) {

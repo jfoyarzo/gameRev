@@ -1,6 +1,12 @@
 import { RatingAdapter, RatingData } from "@/lib/types/ratings";
 import { SearchAdapter, SearchResult } from "@/lib/types/search";
-import { fetchIGDB } from "@/lib/api/igdb-client";
+import {
+    searchIGDBGames,
+    getIGDBGameById,
+    getIGDBGameRatings,
+    getIGDBPopularGames,
+    getIGDBNewGames
+} from "@/lib/api/igdb-client";
 import { IGDBGame } from "@/lib/types/igdb";
 import { GameSourceInfo } from "@/lib/types/game";
 import { BaseAdapter } from "./base-adapter";
@@ -9,15 +15,31 @@ import { formatImageUrl } from "@/lib/utils";
 import {
     NAME_SEARCH_LIMIT,
     POPULAR_GAMES_LIMIT,
-    NEW_GAMES_LIMIT,
-    ONE_SECOND_MS,
-    SEARCH_PAGE_SIZE_IGDB,
-    IGDB_GAME_TYPE_MAIN,
-    IGDB_GAME_TYPE_DLC,
-    IGDB_GAME_TYPE_EXPANSION,
-    IGDB_GAME_TYPE_BUNDLE,
-    IGDB_GAME_TYPE_STANDALONE_EXPANSION
+    NEW_GAMES_LIMIT
 } from "@/lib/constants";
+
+/** Number of results per page for search requests */
+const SEARCH_PAGE_SIZE = 20;
+
+// IGDB Game Types
+const IGDB_GAME_TYPE_MAIN = 0;
+const IGDB_GAME_TYPE_DLC = 1;
+const IGDB_GAME_TYPE_EXPANSION = 2;
+const IGDB_GAME_TYPE_BUNDLE = 3;
+const IGDB_GAME_TYPE_STANDALONE_EXPANSION = 4;
+/*
+// Not used yet
+const IGDB_GAME_TYPE_MOD = 5;
+const IGDB_GAME_TYPE_EPISODE = 6;
+const IGDB_GAME_TYPE_SEASON = 7;
+const IGDB_GAME_TYPE_REMAKE = 8;
+const IGDB_GAME_TYPE_REMASTER = 9;
+const IGDB_GAME_TYPE_EXPANDED_GAME = 10;
+const IGDB_GAME_TYPE_PORT = 11;
+const IGDB_GAME_TYPE_FORK = 12;
+const IGDB_GAME_TYPE_PACK = 13;
+const IGDB_GAME_TYPE_UPDATE = 14;
+*/
 
 export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAdapter {
     name = "IGDB";
@@ -26,7 +48,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
     async search(query: string): Promise<SearchResult[]> {
         return this.handleError(
             async () => {
-                const games = await this.fetchGamesBySearch(query);
+                const games = await searchIGDBGames(query, SEARCH_PAGE_SIZE);
 
                 const results = games.map(game => this.mapToSearchResult(game));
 
@@ -50,7 +72,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
 
                 if (igdbId) {
                     // Fetch by ID
-                    game = await this.fetchGameById(igdbId);
+                    game = await getIGDBGameById(igdbId);
                 } else if (name) {
                     // Fallback: search by name and match
                     game = await this.findGameByNameAndDate(name, releaseDate);
@@ -100,27 +122,13 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
     // --- IGDB-Specific Methods ---
 
     /**
-     * Fetches a game by its IGDB ID
-     */
-    private async fetchGameById(igdbId: string | number): Promise<IGDBGame | null> {
-        const query = `
-            fields name, cover.url, summary, first_release_date, involved_companies.company.name, screenshots.url,
-                   total_rating, total_rating_count, aggregated_rating, aggregated_rating_count, rating, rating_count, url,
-                   platforms.name, game_type;
-            where id = ${igdbId};
-        `;
-        const games = await fetchIGDB<IGDBGame[]>("/games", query);
-        return games[0] || null;
-    }
-
-    /**
      * Finds a game by name with optional date matching for verification
      */
     private async findGameByNameAndDate(
         name: string,
         releaseDate?: string
     ): Promise<IGDBGame | null> {
-        const games = await this.fetchGamesBySearch(name, NAME_SEARCH_LIMIT);
+        const games = await searchIGDBGames(name, NAME_SEARCH_LIMIT);
 
         return this.findMatchingGame(
             games,
@@ -133,13 +141,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
 
     // --- Rating Implementation ---
     async getGameRatings(gameId: string | number): Promise<RatingData[]> {
-        const query = `
-            fields total_rating, total_rating_count, aggregated_rating, aggregated_rating_count, rating, rating_count, url;
-            where id = ${gameId};
-        `;
-
-        const games = await fetchIGDB<IGDBGame[]>("/games", query);
-        const game = games[0];
+        const game = await getIGDBGameRatings(gameId);
 
         if (!game) return [];
 
@@ -197,14 +199,7 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
     async getPopularGames(limit = POPULAR_GAMES_LIMIT): Promise<SearchResult[]> {
         return this.handleError(
             async () => {
-                const query = `
-                    fields name, cover.url, total_rating, first_release_date, platforms.name, game_type;
-                    sort popularity desc;
-                    where cover != null & total_rating != null;
-                    limit ${limit};
-                `;
-
-                const games = await fetchIGDB<IGDBGame[]>("/games", query);
+                const games = await getIGDBPopularGames(limit);
                 return games.map(game => this.mapToSearchResult(game));
             },
             "Popular Games Fetch Failed",
@@ -215,35 +210,12 @@ export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAda
     async getNewGames(limit = NEW_GAMES_LIMIT): Promise<SearchResult[]> {
         return this.handleError(
             async () => {
-                const currentTimestamp = Math.floor(Date.now() / ONE_SECOND_MS);
-                const query = `
-                    fields name, cover.url, total_rating, first_release_date, platforms.name, game_type;
-                    sort first_release_date desc;
-                    where first_release_date < ${currentTimestamp} & cover != null & total_rating != null;
-                    limit ${limit};
-                `;
-
-                const games = await fetchIGDB<IGDBGame[]>("/games", query);
+                const games = await getIGDBNewGames(limit);
                 return games.map(game => this.mapToSearchResult(game));
             },
             "New Games Fetch Failed",
             []
         );
-    }
-
-    /**
-     * Searches for games on IGDB
-     */
-    private async fetchGamesBySearch(query: string, limit = SEARCH_PAGE_SIZE_IGDB): Promise<IGDBGame[]> {
-        const sanitizedQuery = query.replace(/"/g, '\\"');
-        const igdbQuery = `
-            search "${sanitizedQuery}";
-            fields name, cover.url, total_rating, summary, first_release_date, platforms.name, game_type;
-            where cover != null;
-            limit ${limit};
-        `;
-
-        return fetchIGDB<IGDBGame[]>("/games", igdbQuery);
     }
 
     /**

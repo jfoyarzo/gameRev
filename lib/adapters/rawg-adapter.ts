@@ -1,21 +1,27 @@
 import { SearchResult } from "@/lib/types/search";
 import { GameSourceInfo } from "@/lib/types/game";
-import { fetchRAWG } from "@/lib/api/rawg-client";
-import { RAWGGame, RAWGSearchResponse } from "@/lib/types/rawg";
+import {
+    searchRAWGGames,
+    getRAWGGameDetails,
+    getRAWGScreenshots,
+    getRAWGRankedGames
+} from "@/lib/api/rawg-client";
+import { RAWGGame } from "@/lib/types/rawg";
 import { RatingData } from "@/lib/types/ratings";
 import { BaseAdapter } from "./base-adapter";
-import { parseDate } from "./adapter-utils";
+import { parseDate, normalizeRating } from "./adapter-utils";
 import { formatImageUrl } from "@/lib/utils";
 import {
-    SEARCH_PAGE_SIZE_RAWG,
     NAME_SEARCH_LIMIT,
     POPULAR_GAMES_LIMIT,
     NEW_GAMES_LIMIT,
-    RATING_NORMALIZED_SCALE
 } from "@/lib/constants";
 
 /** Maximum rating on RAWG's 0-5 scale */
 const RATING_RAWG_SCALE = 5;
+
+/** Number of results per page for search requests */
+const SEARCH_PAGE_SIZE = 20;
 
 export class RawgAdapter extends BaseAdapter {
     name = "RAWG";
@@ -23,10 +29,7 @@ export class RawgAdapter extends BaseAdapter {
     async search(query: string): Promise<SearchResult[]> {
         return this.handleError(
             async () => {
-                const data = await fetchRAWG<RAWGSearchResponse>("/games", {
-                    search: query,
-                    page_size: SEARCH_PAGE_SIZE_RAWG.toString()
-                });
+                const data = await searchRAWGGames(query, SEARCH_PAGE_SIZE);
 
                 const results = data.results.map(game => this.mapToSearchResult(game));
 
@@ -49,13 +52,13 @@ export class RawgAdapter extends BaseAdapter {
                 const rawgId = sourceIds.RAWG;
 
                 if (rawgId) {
-                    game = await fetchRAWG<RAWGGame>(`/games/${rawgId}`);
+                    game = await getRAWGGameDetails(rawgId);
                 } else if (name) {
                     // Fallback: search by name and match
                     game = await this.findGameByNameAndDate(name, releaseDate);
 
                     if (game) {
-                        game = await fetchRAWG<RAWGGame>(`/games/${game.id}`);
+                        game = await getRAWGGameDetails(game.id);
                     }
                 }
 
@@ -96,10 +99,7 @@ export class RawgAdapter extends BaseAdapter {
         name: string,
         releaseDate?: string
     ): Promise<RAWGGame | null> {
-        const searchData = await fetchRAWG<RAWGSearchResponse>("/games", {
-            search: name,
-            page_size: NAME_SEARCH_LIMIT.toString()
-        });
+        const searchData = await searchRAWGGames(name, NAME_SEARCH_LIMIT);
 
         return this.findMatchingGame(
             searchData.results,
@@ -128,7 +128,7 @@ export class RawgAdapter extends BaseAdapter {
         if (game.rating) {
             ratings.push({
                 sourceName: "RAWG Users",
-                score: Math.round(game.rating * (RATING_NORMALIZED_SCALE / RATING_RAWG_SCALE)), // Normalize 0-5 to 0-100
+                score: normalizeRating(game.rating, RATING_RAWG_SCALE),
                 count: game.ratings_count,
                 summary: "Average rating from RAWG community."
             });
@@ -147,7 +147,7 @@ export class RawgAdapter extends BaseAdapter {
             getName: (g) => g.name,
             getCoverUrl: (g) => formatImageUrl(g.background_image),
             getReleaseDate: (g) => g.released,
-            getRating: (g) => g.metacritic || (g.rating ? g.rating * (RATING_NORMALIZED_SCALE / RATING_RAWG_SCALE) : undefined),
+            getRating: (g) => g.metacritic || (g.rating ? normalizeRating(g.rating, RATING_RAWG_SCALE) : undefined),
             getPlatforms: (g) => g.platforms?.map(p => p.platform.name) || [],
             getReleaseType: (g) => (g.parents_count && g.parents_count > 0) ? "DLC" : "BASE_GAME"
         });
@@ -158,10 +158,8 @@ export class RawgAdapter extends BaseAdapter {
      */
     private async fetchScreenshots(gameId: number): Promise<{ id: number; url: string }[]> {
         try {
-            const screenshotData = await fetchRAWG<{ results: { id: number; image: string }[] }>(
-                `/games/${gameId}/screenshots`
-            );
-            return screenshotData.results.map(s => ({
+            const results = await getRAWGScreenshots(gameId);
+            return results.map(s => ({
                 id: s.id,
                 url: s.image
             }));
@@ -174,11 +172,7 @@ export class RawgAdapter extends BaseAdapter {
     async getPopularGames(limit = POPULAR_GAMES_LIMIT): Promise<SearchResult[]> {
         return this.handleError(
             async () => {
-                const data = await fetchRAWG<RAWGSearchResponse>("/games", {
-                    ordering: "-metacritic",
-                    page_size: limit.toString()
-                });
-
+                const data = await getRAWGRankedGames("-metacritic", limit);
                 return data.results.map(game => this.mapToSearchResult(game));
             },
             "Popular Games Fetch Failed",
@@ -189,11 +183,7 @@ export class RawgAdapter extends BaseAdapter {
     async getNewGames(limit = NEW_GAMES_LIMIT): Promise<SearchResult[]> {
         return this.handleError(
             async () => {
-                const data = await fetchRAWG<RAWGSearchResponse>("/games", {
-                    ordering: "-released",
-                    page_size: limit.toString()
-                });
-
+                const data = await getRAWGRankedGames("-released", limit);
                 return data.results.map(game => this.mapToSearchResult(game));
             },
             "New Games Fetch Failed",

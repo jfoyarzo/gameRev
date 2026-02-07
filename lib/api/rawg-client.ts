@@ -1,28 +1,60 @@
 import 'server-only';
-import { CACHE_REVALIDATE_SECONDS } from "@/lib/constants";
+import { CACHE_TAG_GAMES } from "@/lib/constants";
+import { createAPIClient } from "./base-client";
 import { appConfig } from "@/lib/dal/config";
+import { RAWGGame, RAWGSearchResponse } from "@/lib/types/rawg";
 
 const RAWG_API_KEY = appConfig.rawg.apiKey;
 
-export async function fetchRAWG<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
-    const queryParams = new URLSearchParams({
-        ...params,
-        key: RAWG_API_KEY,
-    });
+const rawgClient = createAPIClient({
+    baseUrl: appConfig.rawg.baseUrl,
+});
 
-    const response = await fetch(`${appConfig.rawg.baseUrl}${endpoint}?${queryParams.toString()}`, {
-        method: "GET",
-        headers: {
-            "Accept": "application/json",
+/**
+ * Generic fetcher for RAWG API
+ */
+async function fetchRAWG<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+    return rawgClient<T>({
+        endpoint,
+        params: {
+            ...params,
+            key: RAWG_API_KEY,
         },
-        // Cache the results for 1 hour
-        next: { revalidate: CACHE_REVALIDATE_SECONDS },
+        tags: [CACHE_TAG_GAMES],
     });
+}
 
-    if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`RAWG API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-    }
+/**
+ * Search for games
+ */
+export async function searchRAWGGames(query: string, pageSize: number): Promise<RAWGSearchResponse> {
+    return fetchRAWG<RAWGSearchResponse>("/games", {
+        search: query,
+        page_size: pageSize.toString(),
+    });
+}
 
-    return response.json();
+/**
+ * Get game details by ID
+ */
+export async function getRAWGGameDetails(id: number | string): Promise<RAWGGame> {
+    return fetchRAWG<RAWGGame>(`/games/${id}`);
+}
+
+/**
+ * Get game screenshots
+ */
+export async function getRAWGScreenshots(id: number | string): Promise<{ id: number; image: string }[]> {
+    const data = await fetchRAWG<{ results: { id: number; image: string }[] }>(`/games/${id}/screenshots`);
+    return data.results;
+}
+
+/**
+ * Get games ranked by a specific criteria (e.g. -metacritic, -released)
+ */
+export async function getRAWGRankedGames(ordering: string, limit: number): Promise<RAWGSearchResponse> {
+    return fetchRAWG<RAWGSearchResponse>("/games", {
+        ordering,
+        page_size: limit.toString(),
+    });
 }
