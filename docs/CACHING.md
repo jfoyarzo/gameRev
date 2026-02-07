@@ -40,25 +40,27 @@ export const revalidate = 3600; // Cache revalidation time in seconds (1 hour)
 
 ### IGDB Client (`lib/api/igdb-client.ts`)
 
+Uses `createAPIClient` with enforced caching strategies:
 ```typescript
+tags: [CACHE_TAG_GAMES], // 'games'
 next: { revalidate: CACHE_REVALIDATE_SECONDS }, // 3600 seconds (1 hour)
 ```
 
-**Purpose:** Cache all IGDB API responses for 1 hour
-- **Why:** IGDB has strict rate limits
-- **Benefit:** Repeated requests for the same game use cached data
-- **Trade-off:** Game metadata (screenshots, descriptions) rarely change hourly anyway
+**Purpose:**
+- **Rate Limit Protection:** IGDB has strict rate limits; caching prevents redundant calls.
+- **Tag-Based Invalidation:** Allows clearing all game data caches via `revalidateTag(CACHE_TAG_GAMES)`.
 
 ### RAWG Client (`lib/api/rawg-client.ts`)
 
+Simulates the same behavior using `createAPIClient`:
 ```typescript
-next: { revalidate: CACHE_REVALIDATE_SECONDS }, // 3600 seconds (1 hour)
+tags: [CACHE_TAG_GAMES],
+next: { revalidate: CACHE_REVALIDATE_SECONDS },
 ```
 
-**Purpose:** Cache all RAWG API responses for 1 hour
-- **Why:** RAWG is a free tier API with rate limits
-- **Benefit:** Same as IGDB - saves quota and improves performance
-- **Trade-off:** Acceptable staleness for ratings data
+**Purpose:**
+- **Quota Management:** RAWG free tier limits are preserved.
+- **Consistency:** Ensures data from all sources expires (or invalidates) together.
 
 ---
 

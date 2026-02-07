@@ -33,7 +33,7 @@ Thank you for your interest in contributing to GameRev! This guide will help you
    ```
 
 4. **Configure Environment**
-   Create `.env.local` with required variables:
+   Create `.env.local` with required variables, you can copy the `.env.example` file and fill the values:
    ```env
    # Database
    DATABASE_URL=postgresql://user:password@localhost:5432/gamerev
@@ -47,10 +47,10 @@ Thank you for your interest in contributing to GameRev! This guide will help you
    RAWG_API_KEY=your_rawg_api_key
    OPENCRITIC_API_KEY=your_opencritic_api_key
    
-   # reCAPTCHA v3 (register localhost at https://www.google.com/recaptcha/admin)
-   # Note: v3 doesn't have universal test keys - register localhost or use your own keys
-   RECAPTCHA_SITE_KEY=your_site_key
-   RECAPTCHA_SECRET_KEY=your_secret_key
+   # reCAPTCHA v3 (Optional for Development)
+   # If not provided, verification will be bypassed in non-production environments
+   # NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
+   # RECAPTCHA_SECRET_KEY=your_secret_key
    ```
 
 5. **Run Database Migrations**
