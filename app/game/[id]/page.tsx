@@ -3,6 +3,9 @@ import { gameService } from "@/lib/services";
 import { GameHero } from "@/components/game-hero";
 import { GameDetails } from "@/components/game-details";
 import { GameRatings } from "@/components/game-ratings";
+import { auth } from "@/auth";
+import { getUserPreferences } from "@/lib/services/user-preferences";
+import { filterSources } from "@/lib/utils/filter-sources";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -40,7 +43,6 @@ async function getGameParams(searchParams: PageProps["searchParams"]) {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
     const { sourceIds, name, releaseDate } = await getGameParams(searchParams);
 
-    // Fetch game data for metadata
     const game = await gameService.getGame(sourceIds, name, releaseDate);
 
     if (!game) {
@@ -77,21 +79,30 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 export default async function GamePage({ searchParams }: PageProps) {
     const { sourceIds, name, releaseDate } = await getGameParams(searchParams);
 
-    // Fetch unified game data from all registered sources
     const game = await gameService.getGame(sourceIds, name, releaseDate);
 
     if (!game) {
         notFound();
     }
 
+    // Fetch user preferences (if authenticated) to filter displayed sources
+    const session = await auth();
+    const preferences = session?.user?.id
+        ? await getUserPreferences(session.user.id)
+        : undefined;
+
+    const detailSources = filterSources(game.sources, preferences?.preferredSources?.details);
+    const ratingSources = filterSources(game.sources, preferences?.preferredSources?.ratings);
+
     return (
         <div className="min-h-screen bg-background pb-20">
             <GameHero game={game} />
 
             <div className="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
-                <GameDetails game={game} />
-                <GameRatings game={game} />
+                <GameDetails game={game} sources={detailSources} />
+                <GameRatings game={game} sources={ratingSources} />
             </div>
         </div>
     );
 }
+

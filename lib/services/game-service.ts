@@ -2,6 +2,7 @@ import { cache } from "react";
 import { GameAdapter } from "../types/adapter";
 import { UnifiedGameData, GameSourceInfo } from "../types/game";
 import { SearchResult } from "../types/search";
+import { UserPreferences } from "../types/preferences";
 
 const PRIMARY_SOURCE_NAME = "IGDB";
 const DEFAULT_COVER_IMAGE = "/placeholder-game.jpg";
@@ -23,7 +24,7 @@ export class GameService {
      * Uses React cache() to deduplicate calls within the same request
      * (e.g., when both generateMetadata() and page component fetch the same game).
      */
-    getGame = cache(async (sourceIds: Record<string, string | number>, name?: string, releaseDate?: string): Promise<UnifiedGameData | null> => {
+    getGame = cache(async (sourceIds: Record<string, string | number>, name?: string, releaseDate?: string, preferences?: UserPreferences): Promise<UnifiedGameData | null> => {
         // Fetch from all adapters in parallel
         // We pass the sourceIds map and releaseDate for verification.
         const promises = this.adapters.map(adapter => adapter.getGameDetails(sourceIds, name, releaseDate));
@@ -32,15 +33,22 @@ export class GameService {
         const sources: Record<string, GameSourceInfo> = {};
         let primaryResult: GameSourceInfo | null = null;
 
+        // Determine primary source name based on preferences
+        const preferredDetailsSources = preferences?.preferredSources?.details || [PRIMARY_SOURCE_NAME];
+
         results.forEach(res => {
             if (res) {
                 sources[res.sourceName] = res;
-                // Prefer primary source if available
-                if (res.sourceName === PRIMARY_SOURCE_NAME) {
-                    primaryResult = res;
-                }
             }
         });
+
+        // Find primary result based on preference priority
+        for (const sourceName of preferredDetailsSources) {
+            if (sources[sourceName]) {
+                primaryResult = sources[sourceName];
+                break;
+            }
+        }
 
         // Debug logging to track which sources contributed
         const contributedSources = Object.keys(sources);

@@ -1,19 +1,21 @@
 "use client";
 
-import { UnifiedGameData } from "@/lib/types/game";
+import { UnifiedGameData, GameSourceInfo } from "@/lib/types/game";
 import { useState } from "react";
 import Image from "next/image";
 import { formatImageUrl } from "@/lib/utils";
 
 interface GameDetailsProps {
     game: UnifiedGameData;
+    sources?: Record<string, GameSourceInfo>;
 }
 
-export function GameDetails({ game }: GameDetailsProps) {
-    const sourceNames = Object.keys(game.sources);
+export function GameDetails({ game, sources: filteredSources }: GameDetailsProps) {
+    const sources = filteredSources ?? game.sources;
+    const sourceNames = Object.keys(sources);
     const [activeTab, setActiveTab] = useState(sourceNames[0]);
 
-    const sourceData = game.sources[activeTab];
+    const sourceData = sources[activeTab];
 
     return (
         <div className="lg:col-span-2 space-y-12">
