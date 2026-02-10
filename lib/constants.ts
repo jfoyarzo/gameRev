@@ -49,3 +49,14 @@ export const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
 /** Default number of days used for "one month" tolerance in date matching */
 export const DAYS_IN_MONTH = 31;
+
+// ==================== Adapters ====================
+
+/** 
+ * List of available game data adapters.
+ * Add new adapter names here to automatically update types and UI.
+ */
+export const AVAILABLE_ADAPTERS = ['IGDB', 'RAWG', 'OpenCritic'] as const;
+
+/** Unique adapter source names */
+export type AdapterName = typeof AVAILABLE_ADAPTERS[number];
