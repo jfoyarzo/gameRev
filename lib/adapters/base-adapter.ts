@@ -2,7 +2,7 @@ import { SearchResult } from "@/lib/types/search";
 import { GameSourceInfo } from "@/lib/types/game";
 import { GameAdapter } from "@/lib/types/adapter";
 import { matchesByNameAndDate, parseDate } from "@/lib/adapters/adapter-utils";
-import { DAYS_IN_MONTH } from "@/lib/constants";
+import { DAYS_IN_MONTH, AdapterName } from "@/lib/constants";
 
 /**
  * Abstract base class for game data source adapters.
@@ -15,7 +15,7 @@ import { DAYS_IN_MONTH } from "@/lib/constants";
  * - getNewGames(): Fetch new games
  */
 export abstract class BaseAdapter implements GameAdapter {
-    abstract name: string;
+    abstract name: AdapterName;
     abstract search(query: string): Promise<SearchResult[]>;
     abstract getGameDetails(
         sourceIds: Record<string, string | number>,
