@@ -5,6 +5,7 @@ import {
     text,
     primaryKey,
     integer,
+    jsonb,
 } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "next-auth/adapters"
 
@@ -17,6 +18,7 @@ export const users = pgTable("users", {
     emailVerified: timestamp("emailVerified", { mode: "date" }),
     avatar_url: text("avatar_url"),
     password_hash: text("password_hash"),
+    preferences: jsonb("preferences"),
 })
 
 export const accounts = pgTable(
