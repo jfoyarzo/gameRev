@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { SearchAdapter, SearchResult } from "@/lib/types/search";
+import { UserPreferences } from "@/lib/types/preferences";
 import { normalizeGameName, calculateSearchScore } from "@/lib/adapters/adapter-utils";
 import {
     DAYS_IN_MONTH,
@@ -35,10 +36,23 @@ export class SearchService {
      * @param query The search query string
      * @returns Aggregated and deduplicated search results, sorted by relevance
      */
-    search = cache(async (query: string): Promise<SearchResult[]> => {
+    search = cache(async (query: string, preferences?: UserPreferences): Promise<SearchResult[]> => {
         this.currentQuery = query;
 
-        const promises = this.adapters.map(adapter => adapter.search(query));
+        let activeAdapters = this.adapters;
+
+        if (preferences?.preferredSources) {
+            const detailsSources = preferences.preferredSources.details || [];
+            const ratingsSources = preferences.preferredSources.ratings || [];
+
+            // Create a set of all unique sources that are enabled in either details or ratings
+            const allowedSources = new Set([...detailsSources, ...ratingsSources]);
+
+            // Filter adapters to only include those present in allowedSources
+            activeAdapters = this.adapters.filter(adapter => allowedSources.has(adapter.name));
+        }
+
+        const promises = activeAdapters.map(adapter => adapter.search(query));
         const resultsArrays = await Promise.all(promises);
         const allResults = resultsArrays.flat();
 

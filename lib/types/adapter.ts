@@ -1,5 +1,6 @@
 import { SearchResult } from "./search";
 import { GameSourceInfo } from "./game";
+import { AdapterName } from "@/lib/constants";
 
 /**
  * GameAdapter Interface
@@ -18,7 +19,7 @@ export interface GameAdapter {
     /**
      * The name of the data source (e.g., "IGDB", "RAWG")
      */
-    name: string;
+    name: AdapterName;
 
     /**
      * Searches for games matching the query

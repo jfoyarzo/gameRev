@@ -77,6 +77,20 @@ export const getAccessToken = cache(async () => { ... });
 - **Benefit:** Only one token request per server-side render
 - **Scope:** Request-scoped (not persisted across users)
 
+### User Preferences (`lib/services/user-preferences.ts`)
+
+```typescript
+export const getUserPreferences = unstable_cache(
+    async (userId) => { ... },
+    [`user-preferences-${userId}`],
+    { tags: [`user-preferences-${userId}`], revalidate: 3600 }
+);
+```
+
+**Purpose:**
+- **Database Load Reduction:** Prevents hitting the database on every page load for user preferences.
+- **Tag-Based Invalidation:** Cache is cleared via `revalidateTag` when user updates their preferences.
+
 ---
 
 ## Best Practices for Production

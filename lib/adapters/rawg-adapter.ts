@@ -12,6 +12,7 @@ import { BaseAdapter } from "./base-adapter";
 import { parseDate, normalizeRating } from "./adapter-utils";
 import { formatImageUrl } from "@/lib/utils";
 import {
+    AdapterName,
     NAME_SEARCH_LIMIT,
     POPULAR_GAMES_LIMIT,
     NEW_GAMES_LIMIT,
@@ -24,7 +25,7 @@ const RATING_RAWG_SCALE = 5;
 const SEARCH_PAGE_SIZE = 20;
 
 export class RawgAdapter extends BaseAdapter {
-    name = "RAWG";
+    name: AdapterName = "RAWG";
 
     async search(query: string): Promise<SearchResult[]> {
         return this.handleError(

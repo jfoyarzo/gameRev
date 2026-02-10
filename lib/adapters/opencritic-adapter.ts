@@ -4,6 +4,7 @@ import { GameSourceInfo } from "@/lib/types/game";
 import { BaseAdapter } from "./base-adapter";
 import { calculateSearchScore } from "./adapter-utils";
 import { formatImageUrl } from "@/lib/utils";
+import { AdapterName } from "@/lib/constants";
 import {
     searchOpenCritic,
     getOpenCriticGame,
@@ -22,8 +23,9 @@ const OPENCRITIC_IMAGE_BASE = 'https://img.opencritic.com/';
 /** Max results to enrich with full game details */
 const ENRICH_LIMIT = 5;
 
+
 export class OpencriticAdapter extends BaseAdapter implements RatingAdapter, SearchAdapter {
-    name = "OpenCritic";
+    name: AdapterName = "OpenCritic";
 
     // --- Search Implementation ---
     async search(query: string): Promise<SearchResult[]> {

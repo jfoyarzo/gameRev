@@ -1,3 +1,5 @@
+import { AdapterName } from "@/lib/constants";
+
 export interface SearchResult {
     sourceIds: Record<string, string | number>;
     name: string;
@@ -12,5 +14,5 @@ export interface SearchResult {
 
 export interface SearchAdapter {
     search(query: string): Promise<SearchResult[]>;
-    name: string;
+    name: AdapterName;
 }

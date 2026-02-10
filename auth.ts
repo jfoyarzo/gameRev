@@ -18,6 +18,21 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         maxAge: SESSION_MAX_AGE_SECONDS,
         updateAge: SESSION_UPDATE_AGE_SECONDS,
     },
+    callbacks: {
+        ...authConfig.callbacks,
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token.id && session.user) {
+                session.user.id = token.id as string;
+            }
+            return session;
+        },
+    },
     providers: [
         Credentials({
             async authorize(credentials) {

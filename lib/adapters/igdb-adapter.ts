@@ -13,6 +13,7 @@ import { BaseAdapter } from "./base-adapter";
 import { unixToISODate, parseDate } from "./adapter-utils";
 import { formatImageUrl } from "@/lib/utils";
 import {
+    AdapterName,
     NAME_SEARCH_LIMIT,
     POPULAR_GAMES_LIMIT,
     NEW_GAMES_LIMIT
@@ -41,8 +42,9 @@ const IGDB_GAME_TYPE_PACK = 13;
 const IGDB_GAME_TYPE_UPDATE = 14;
 */
 
+
 export class IgdbAdapter extends BaseAdapter implements RatingAdapter, SearchAdapter {
-    name = "IGDB";
+    name: AdapterName = "IGDB";
 
     // --- Search Implementation ---
     async search(query: string): Promise<SearchResult[]> {

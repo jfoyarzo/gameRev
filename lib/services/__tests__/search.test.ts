@@ -3,9 +3,11 @@ import { SearchService } from '../search';
 import { SearchAdapter, SearchResult } from '@/lib/types/search';
 
 // Mock adapters
+import { AdapterName } from "@/lib/constants";
+
 class MockAdapter implements SearchAdapter {
     constructor(
-        public name: string,
+        public name: AdapterName,
         private results: SearchResult[]
     ) { }
 

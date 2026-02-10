@@ -3,9 +3,7 @@ import { GameAdapter } from "@/lib/types/adapter";
 import { IgdbAdapter } from "./igdb-adapter";
 import { RawgAdapter } from "./rawg-adapter";
 import { OpencriticAdapter } from "./opencritic-adapter";
-
-/** Unique adapter source names */
-export type AdapterName = 'IGDB' | 'RAWG' | 'OpenCritic';
+import { AVAILABLE_ADAPTERS, AdapterName } from "@/lib/constants";
 
 interface AdapterRegistryEntry {
     adapter: GameAdapter;
@@ -18,7 +16,7 @@ interface AdapterRegistryEntry {
  * Centralized adapter registry for managing game data sources.
  * 
  * Adding a new source:
- * 1. Add the source name to AdapterName type
+ * 1. Add the source name to AVAILABLE_ADAPTERS in @/lib/constants
  * 2. Create the adapter class extending BaseAdapter
  * 3. Add an entry to REGISTRY with appropriate priority
  */
@@ -47,7 +45,5 @@ export function getAdapter(name: AdapterName): GameAdapter | null {
 }
 
 export function getEnabledAdapterNames(): AdapterName[] {
-    return (Object.entries(REGISTRY) as [AdapterName, AdapterRegistryEntry][])
-        .filter(([, entry]) => entry.enabled)
-        .map(([name]) => name);
+    return AVAILABLE_ADAPTERS.filter(name => REGISTRY[name].enabled);
 }
