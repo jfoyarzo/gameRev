@@ -1,7 +1,10 @@
-import { SearchResult } from "@/lib/types/search";
-import { searchService } from "@/lib/services";
-import { GameCard } from "@/components/game-card";
 import { Search } from "lucide-react";
+import { auth } from "@/auth";
+import { SearchResult } from "@/lib/types/search";
+import { UserPreferences } from "@/lib/types/preferences";
+import { searchService } from "@/lib/services";
+import { getUserPreferences } from "@/lib/services/user-preferences";
+import { GameCard } from "@/components/game-card";
 
 interface SearchPageProps {
     searchParams: Promise<{
@@ -9,11 +12,18 @@ interface SearchPageProps {
     }>;
 }
 
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
     const { q } = await searchParams;
     const query = q || "";
+    const session = await auth();
+    let userPreferences: UserPreferences | undefined;
 
-    const results: SearchResult[] = query ? await searchService.search(query) : [];
+    if (session?.user?.id) {
+        userPreferences = await getUserPreferences(session.user.id);
+    }
+
+    const results: SearchResult[] = query ? await searchService.search(query, userPreferences) : [];
 
     return (
         <div className="container mx-auto px-4 py-8 min-h-screen">
