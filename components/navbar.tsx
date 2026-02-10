@@ -4,6 +4,12 @@ import { Gamepad2, Search } from "lucide-react";
 import { SearchInput } from "./search-input";
 import { verifySession } from "@/lib/auth";
 import { SignOut } from "@/components/auth/sign-out-button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export async function Navbar() {
     const session = await verifySession();
@@ -40,9 +46,20 @@ export async function Navbar() {
                     <div className="flex items-center gap-2">
                         {session?.user ? (
                             <div className="flex items-center gap-4">
-                                <span className="text-sm font-medium hidden md:inline-block">
-                                    {session.user.name || session.user.email}
-                                </span>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="relative h-8 w-fit px-2 rounded-full font-normal">
+                                            <span className="text-sm font-medium hidden md:inline-block">
+                                                {session.user.name || session.user.email}
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/settings/preferences">Edit Preferences</Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <SignOut />
                             </div>
                         ) : (

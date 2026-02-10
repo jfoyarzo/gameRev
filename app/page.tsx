@@ -1,12 +1,23 @@
+import Link from "next/link";
+import { ArrowRight, Flame, Sparkles } from "lucide-react";
+import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { GameCard } from "@/components/game-card";
 import { gameService } from "@/lib/services";
-import Link from "next/link";
-import { ArrowRight, Flame, Sparkles } from "lucide-react";
+import { getUserPreferences } from "@/lib/services/user-preferences";
+import { UserPreferences } from "@/lib/types/preferences";
 
 export const revalidate = 3600; // Cache revalidation time in seconds (1 hour)
 
+
 export default async function Home() {
+  const session = await auth();
+  let userPreferences: UserPreferences | undefined;
+
+  if (session?.user?.id) {
+    userPreferences = await getUserPreferences(session.user.id);
+  }
+
   const [popularGames, newGames] = await Promise.all([
     gameService.getPopularGames(8),
     gameService.getNewGames(4),
